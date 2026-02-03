@@ -3,8 +3,8 @@
 # Site settings
 title: "Specflow Documentation"
 description: "Architecture contracts for AI-generated code"
-baseurl: ""
-url: "https://hulupeep.github.io/specflow-help"
+baseurl: "/specflow-help"
+url: "https://hulupeep.github.io"
 
 # Theme
 remote_theme: just-the-docs/just-the-docs
