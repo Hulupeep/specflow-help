@@ -59,25 +59,28 @@ git --version   # Any recent version works
 
 ## Quick Start
 
-The fastest path: run `waves-controller` on a sample repository.
+The fastest path: add Specflow agents to your project and invoke via Claude Code.
 
 ```bash
-# 1. Install Specflow agents (conceptual - adjust for actual installation)
-npm install -g @specflow/cli
+# 1. Clone Specflow repository
+git clone https://github.com/Hulupeep/Specflow.git
 
-# 2. Clone sample repository
-git clone https://github.com/Hulupeep/specflow-sample
-cd specflow-sample
+# 2. Copy agents to your project
+cp -r Specflow/scripts/agents your-project/scripts/
+cp Specflow/CLAUDE.md your-project/  # Optional: Agent invocation guide
 
-# 3. Set API key (Claude or OpenAI)
-export ANTHROPIC_API_KEY=sk-ant-...
-# OR
-export OPENAI_API_KEY=sk-...
+# 3. Set up Claude Code (or your preferred LLM interface)
+# Install: https://claude.ai/download
 
-# 4. Run waves-controller
-specflow waves execute
+# 4. Create GitHub issues with Gherkin acceptance criteria
+# Example issue format in Specflow/docs/contracts/
 
-# Output:
+# 5. Invoke waves-controller agent via Claude Code:
+# - Read scripts/agents/waves-controller.md for the agent prompt
+# - Use Task tool to spawn agent with your specific request
+# - Agent handles: discovery → contracts → implementation → tests → closure
+
+# Output (from waves-controller):
 # 🌊 Wave 1: Discovery
 #   → Analyzing 12 open GitHub issues
 #   → Calculating dependencies

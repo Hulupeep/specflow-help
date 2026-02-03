@@ -103,20 +103,24 @@ Specflow isn't just a framework. It's a **methodology** powered by 18 specialize
 ## Quick Start
 
 ```bash
-# 1. Install Specflow agents
-npm install -g specflow-cli
+# 1. Add Specflow to your project
+git clone https://github.com/Hulupeep/Specflow.git
+cp -r Specflow/scripts/agents your-project/scripts/
 
-# 2. Run waves-controller on your repo
-specflow waves execute --repo=./your-project
+# 2. Create GitHub issues with acceptance criteria (Gherkin)
+# See: https://github.com/your-org/your-project/issues/new
 
-# 3. Watch agents work
-# - specflow-writer: Creates contracts from GitHub issues
-# - migration-builder: Generates database migrations
-# - playwright-from-specflow: Creates E2E tests
-# - test-runner: Verifies all contracts pass
+# 3. Use Claude Code to invoke waves-controller agent
+# Read scripts/agents/waves-controller.md
+# Task("Execute waves", "{prompt content}", "general-purpose")
 
-# 4. Ship
-# Contracts pass = architecture verified = safe to deploy
+# 4. Agents autonomously:
+# - Generate contracts from issues (specflow-writer)
+# - Build database migrations (migration-builder)
+# - Create E2E tests (playwright-from-specflow)
+# - Verify contracts pass (test-runner)
+
+# 5. Ship when contracts pass ✅
 ```
 
 [Full Getting Started Guide →](/getting-started/)
