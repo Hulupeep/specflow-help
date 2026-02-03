@@ -1,0 +1,71 @@
+// Specflow custom color scheme
+// Based on Just the Docs but with Specflow branding
+
+$blue-000: #f0f4ff !default;
+$blue-100: #d6e3ff !default;
+$blue-200: #b3ceff !default;
+$blue-300: #80b3ff !default;
+$blue-400: #4d94ff !default;
+$blue-500: #2563eb !default; // Primary Specflow blue
+$blue-600: #1e40af !default;
+$blue-700: #1e3a8a !default;
+
+$green-000: #f0fdf4 !default;
+$green-100: #dcfce7 !default;
+$green-200: #bbf7d0 !default;
+$green-300: #86efac !default;
+$green-400: #4ade80 !default;
+$green-500: #22c55e !default; // Success green
+$green-600: #16a34a !default;
+$green-700: #15803d !default;
+
+$grey-dk-000: #1f2937 !default;
+$grey-dk-100: #374151 !default;
+$grey-dk-200: #4b5563 !default;
+$grey-dk-300: #6b7280 !default;
+
+$grey-lt-000: #f9fafb !default;
+$grey-lt-100: #f3f4f6 !default;
+$grey-lt-200: #e5e7eb !default;
+$grey-lt-300: #d1d5db !default;
+
+$purple-000: #faf5ff !default;
+$purple-100: #f3e8ff !default;
+$purple-200: #e9d5ff !default;
+$purple-300: #d8b4fe !default;
+$purple-400: #c084fc !default;
+$purple-500: #a855f7 !default; // Accent purple
+$purple-600: #9333ea !default;
+$purple-700: #7e22ce !default;
+
+$red-000: #fef2f2 !default;
+$red-100: #fee2e2 !default;
+$red-200: #fecaca !default;
+$red-300: #fca5a5 !default;
+$red-400: #f87171 !default;
+$red-500: #ef4444 !default; // Error red
+$red-600: #dc2626 !default;
+$red-700: #b91c1c !default;
+
+$yellow-000: #fefce8 !default;
+$yellow-100: #fef9c3 !default;
+$yellow-200: #fef08a !default;
+$yellow-300: #fde047 !default;
+
+$body-background-color: $grey-lt-000 !default;
+$sidebar-color: $grey-lt-100 !default;
+$search-background-color: $grey-lt-000 !default;
+$table-background-color: $grey-lt-000 !default;
+$code-background-color: $grey-lt-100 !default;
+$feedback-color: darken($sidebar-color, 3%) !default;
+
+$body-text-color: $grey-dk-000 !default;
+$body-heading-color: $grey-dk-100 !default;
+$search-result-preview-color: $grey-dk-200 !default;
+$nav-child-link-color: $grey-dk-100 !default;
+$link-color: $blue-500 !default;
+$btn-primary-color: $blue-500 !default;
+$base-button-color: $grey-lt-200 !default;
+$border-color: $grey-lt-200 !default;
+
+$code-linenumber-color: $grey-dk-300 !default;

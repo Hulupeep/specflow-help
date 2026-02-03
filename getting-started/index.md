@@ -1,0 +1,173 @@
+---
+layout: default
+title: Getting Started
+nav_order: 2
+has_children: true
+permalink: /getting-started/
+---
+
+# Getting Started with Specflow
+{: .no_toc }
+
+Get up and running with Specflow in under 5 minutes.
+{: .fs-6 .fw-300 }
+
+---
+
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
+## The Agent-First Approach
+
+**SpecFlow isn't testing. It's containment.**
+
+The fastest way to use Specflow is to let **agents do the work**:
+
+1. You define what matters (GitHub issues, requirements)
+2. `waves-controller` orchestrates 18+ specialized agents
+3. Agents generate contracts, migrations, tests, implementation
+4. Tests enforce architectural boundaries automatically
+5. You ship (or stop if contracts fail)
+
+**This guide focuses on the agent-first workflow.** Manual setup is covered in [Advanced](/advanced/).
+
+---
+
+## Prerequisites
+
+Before you start, ensure you have:
+
+- **Node.js 18+** (for agent execution)
+- **GitHub CLI** (`gh`) configured with authentication
+- **Git** (for repository operations)
+- **Claude or OpenAI API key** (agents require LLM access)
+
+Check your environment:
+
+```bash
+node --version  # Should be 18.0.0 or higher
+gh --version    # Should be 2.0.0 or higher
+git --version   # Any recent version works
+```
+
+---
+
+## Quick Start
+
+The fastest path: run `waves-controller` on a sample repository.
+
+```bash
+# 1. Install Specflow agents (conceptual - adjust for actual installation)
+npm install -g @specflow/cli
+
+# 2. Clone sample repository
+git clone https://github.com/Hulupeep/specflow-sample
+cd specflow-sample
+
+# 3. Set API key (Claude or OpenAI)
+export ANTHROPIC_API_KEY=sk-ant-...
+# OR
+export OPENAI_API_KEY=sk-...
+
+# 4. Run waves-controller
+specflow waves execute
+
+# Output:
+# 🌊 Wave 1: Discovery
+#   → Analyzing 12 open GitHub issues
+#   → Calculating dependencies
+#   → Priority scoring complete
+#
+# 🤖 Spawning Agents (Wave 1):
+#   → specflow-writer: Creating contracts from issues #45, #46
+#   → migration-builder: Database changes for #47
+#   → playwright-from-specflow: E2E tests for #48
+#
+# ⚡ Parallel Execution (DPAO):
+#   → 4 agents running concurrently
+#   → Progress: ████████░░ 80%
+#
+# ✅ Wave 1 Complete:
+#   → 4 contracts created
+#   → 3 migrations generated
+#   → 8 E2E tests written
+#   → All tests passing
+#
+# 📊 Summary:
+#   → Duration: 4m 23s
+#   → Issues closed: 4/12
+#   → Next wave: 8 issues ready
+```
+
+**That's it.** Specflow just:
+1. Read your GitHub issues
+2. Generated contracts defining what matters
+3. Spawned agents to implement + test
+4. Verified everything works
+
+---
+
+## What Just Happened?
+
+### 1. waves-controller analyzed your project
+
+It looked at:
+- Open GitHub issues (scope, dependencies, acceptance criteria)
+- Existing codebase (architecture, patterns, constraints)
+- Contract definitions (what's already enforced)
+
+### 2. It calculated dependency waves
+
+Issues were grouped into waves based on:
+- **Blockers**: What must complete before this can start
+- **Priority**: Critical > Important > Future
+- **Complexity**: Simple issues in early waves
+
+### 3. It spawned specialized agents in parallel
+
+Each agent has a specific role:
+- **specflow-writer**: Creates contracts from requirements
+- **migration-builder**: Generates database migrations
+- **playwright-from-specflow**: Writes E2E tests from Gherkin
+- **contract-validator**: Verifies implementation matches spec
+- **test-runner**: Executes tests and reports failures
+
+### 4. It verified contracts hold
+
+Every contract is enforced by a test:
+```yaml
+invariant:
+  id: LEAVE-001
+  rule: "Leave approval MUST debit from leave_entitlements ledger"
+  enforcement: e2e_test  # Playwright test runs automatically
+```
+
+If the test fails, the build fails. **No manual review needed.**
+
+---
+
+## Next Steps
+
+- **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on your own project
+- **[Understand Contracts](/core-concepts/contracts/)** — Learn what contracts enforce
+- **[Explore Agents](/agent-system/)** — Dive into the 18 agent types
+- **[Read the Background](/background/)** — Understand the academic foundation
+
+---
+
+## Getting Help
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/Hulupeep/Specflow/issues)
+- **Discussions**: [Ask questions and share experiences](https://github.com/Hulupeep/Specflow/discussions)
+- **Documentation**: You're already here!
+
+---
+
+**Remember:** TypeScript rejects type errors. Specflow rejects architecture errors.
+
+Start enforcing boundaries today.

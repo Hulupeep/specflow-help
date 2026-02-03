@@ -1,0 +1,80 @@
+# Specflow Documentation Site Configuration
+
+# Site settings
+title: "Specflow Documentation"
+description: "Architecture contracts for AI-generated code"
+baseurl: ""
+url: "https://hulupeep.github.io/specflow-help"
+
+# Theme
+remote_theme: just-the-docs/just-the-docs
+color_scheme: light
+
+# Logo
+logo: "/assets/images/specflow-logo.png"
+
+# Search
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  tokenizer_separator: /[\s/]+/
+  rel_url: true
+  button: true
+
+# Navigation
+nav_enabled: true
+nav_sort: case_insensitive
+
+# Aux links (top right)
+aux_links:
+  "GitHub":
+    - "https://github.com/Hulupeep/Specflow"
+
+# Footer
+footer_content: "Copyright &copy; 2025 Specflow. Built with <a href=\"https://jekyllrb.com/\">Jekyll</a> and <a href=\"https://just-the-docs.com/\">Just the Docs</a>."
+
+# Collections
+collections:
+  docs:
+    permalink: "/:collection/:path/"
+    output: true
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: ""
+      type: docs
+    values:
+      layout: default
+
+# Code highlighting
+kramdown:
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+# Mermaid support (for diagrams)
+mermaid:
+  version: "10.6.1"
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-github-metadata
+  - jekyll-include-cache
+
+# Exclude from processing
+exclude:
+  - node_modules/
+  - vendor/
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - CONTRIBUTING.md
