@@ -13,6 +13,9 @@ group :jekyll_plugins do
   gem "jekyll-include-cache", "~> 0.2"
 end
 
+# Markdown parser for GitHub Flavored Markdown
+gem "kramdown-parser-gfm", "~> 1.1"
+
 # Windows and JRuby does not include zoneinfo files
 platforms :mingw, :x64_mingw, :mswin, :jruby do
   gem "tzinfo", ">= 1", "< 3"
