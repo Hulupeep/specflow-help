@@ -1,3 +1,10 @@
+---
+layout: default
+title: Journey Enforcer
+parent: Agent System
+nav_order: 18
+---
+
 # Agent: journey-enforcer
 
 ## Role

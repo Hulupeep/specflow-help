@@ -1,3 +1,10 @@
+---
+layout: default
+title: Contract Test Generator
+parent: Agent System
+nav_order: 12
+---
+
 # Agent: contract-test-generator
 
 ## Role

@@ -1,3 +1,10 @@
+---
+layout: default
+title: Dependency Mapper
+parent: Agent System
+nav_order: 14
+---
+
 # Agent: dependency-mapper
 
 ## Role

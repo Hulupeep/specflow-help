@@ -1,3 +1,10 @@
+---
+layout: default
+title: Sprint Executor
+parent: Agent System
+nav_order: 24
+---
+
 # Agent: sprint-executor
 
 ## Role

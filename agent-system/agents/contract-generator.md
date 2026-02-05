@@ -1,3 +1,10 @@
+---
+layout: default
+title: Contract Generator
+parent: Agent System
+nav_order: 11
+---
+
 # Agent: contract-generator
 
 ## Role

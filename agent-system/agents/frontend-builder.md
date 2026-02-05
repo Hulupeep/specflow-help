@@ -1,3 +1,10 @@
+---
+layout: default
+title: Frontend Builder
+parent: Agent System
+nav_order: 17
+---
+
 # Agent: frontend-builder
 
 ## Role

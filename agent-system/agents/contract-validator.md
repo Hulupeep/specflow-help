@@ -1,3 +1,10 @@
+---
+layout: default
+title: Contract Validator
+parent: Agent System
+nav_order: 13
+---
+
 # Agent: contract-validator
 
 ## Role

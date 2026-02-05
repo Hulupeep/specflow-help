@@ -1,3 +1,10 @@
+---
+layout: default
+title: Ticket Closer
+parent: Agent System
+nav_order: 26
+---
+
 # Agent: ticket-closer
 
 ## Role

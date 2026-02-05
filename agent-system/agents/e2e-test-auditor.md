@@ -1,3 +1,10 @@
+---
+layout: default
+title: E2E Test Auditor
+parent: Agent System
+nav_order: 15
+---
+
 # E2E Test Auditor Agent
 
 ## Purpose

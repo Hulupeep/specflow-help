@@ -1,3 +1,10 @@
+---
+layout: default
+title: Board Auditor
+parent: Agent System
+nav_order: 10
+---
+
 # Agent: board-auditor
 
 ## Role

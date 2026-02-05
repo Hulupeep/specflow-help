@@ -1,3 +1,10 @@
+---
+layout: default
+title: Specflow Uplifter
+parent: Agent System
+nav_order: 22
+---
+
 # Agent: specflow-uplifter
 
 ## Role

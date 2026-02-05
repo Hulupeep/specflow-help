@@ -1,3 +1,10 @@
+---
+layout: default
+title: Waves Controller Agent
+parent: Agent System
+nav_order: 27
+---
+
 # Waves Controller Agent
 
 ## Role

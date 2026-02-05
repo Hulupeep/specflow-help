@@ -1,3 +1,10 @@
+---
+layout: default
+title: Edge Function Builder
+parent: Agent System
+nav_order: 16
+---
+
 # Agent: edge-function-builder
 
 ## Role
