@@ -9,7 +9,7 @@ permalink: /agent-system/agent-reference/
 # Complete Agent Reference
 {: .no_toc }
 
-All 18 Specflow agents and when to use them.
+All 23+ Specflow agents and when to use them.
 {: .fs-6 .fw-300 }
 
 ---
@@ -24,13 +24,14 @@ All 18 Specflow agents and when to use them.
 
 ## Agent Categories
 
-Specflow has 18 specialized agents grouped into 5 categories:
+Specflow has 23+ specialized agents grouped into 6 categories:
 
 1. **Orchestration** (1 agent) — waves-controller
 2. **Contract Generation** (3 agents) — Create and test contracts
 3. **Implementation** (3 agents) — Generate code (database, backend, frontend)
 4. **Testing** (4 agents) — Generate and run tests
 5. **Validation & Workflow** (7 agents) — Verify quality, manage issues
+6. **Agent Teams** (5 agents) — Persistent teammate coordination
 
 ---
 
@@ -613,6 +614,113 @@ Read scripts/agents/specflow-uplifter.md, then add Specflow to this legacy proje
 
 ---
 
+## 6. Agent Teams Agents
+
+These agents are available when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` is set. They enable persistent peer-to-peer coordination instead of hub-and-spoke subagent dispatching.
+
+**[Full Agent Teams Documentation -->](/agent-system/agent-teams/)**
+
+### issue-lifecycle
+
+**Role:** Full lifecycle management for a single GitHub issue
+
+**When to use:**
+- Agent Teams mode is enabled
+- waves-controller spawns one per issue in a wave
+- Not invoked manually (spawned by waves-controller)
+
+**Capabilities:**
+- Owns entire issue from contracts through closure
+- Maintains persistent context (no re-reading between phases)
+- Self-repairs: detects test failures and fixes own bugs
+- Communicates with db-coordinator, quality-gate, and peer issue-lifecycle agents
+
+**Key difference from subagents:**
+- Subagent mode: 6 separate agents per issue, each stateless
+- issue-lifecycle: 1 persistent agent per issue, full context retained
+
+---
+
+### db-coordinator
+
+**Role:** Migration number management and conflict detection
+
+**When to use:**
+- Agent Teams mode is enabled
+- Multiple issues need database migrations simultaneously
+- Spawned once per wave by waves-controller
+
+**Capabilities:**
+- Assigns sequential migration numbers (prevents `migration_175` collisions)
+- Detects schema conflicts (two agents modifying same table)
+- Validates foreign key dependencies across parallel migrations
+- Responds to `REQUEST_MIGRATION` messages from issue-lifecycle agents
+
+**Example interaction:**
+```
+issue-lifecycle-42: REQUEST_MIGRATION { table: "audit_log", operation: "CREATE TABLE" }
+db-coordinator:     MIGRATION_ASSIGNED { number: 176, file: "176_create_audit_log.sql" }
+```
+
+---
+
+### quality-gate
+
+**Role:** Test execution service for teams
+
+**When to use:**
+- Agent Teams mode is enabled
+- Spawned once per wave by waves-controller
+- Handles all three tiers of testing
+
+**Capabilities:**
+- Executes contract tests (`pnpm test -- contracts`)
+- Executes E2E tests (`pnpm test:e2e`)
+- Executes build verification (`pnpm build`)
+- Compares results against `.specflow/baseline.json`
+- Determines pass/fail for issue gate, wave gate, and regression gate
+
+**Tiers:**
+- **Tier 1 (Issue Gate):** Per-issue tests, blocks issue closure
+- **Tier 2 (Wave Gate):** Cross-issue tests, blocks next wave
+- **Tier 3 (Regression Gate):** Full suite, blocks merge to main
+
+---
+
+### journey-gate
+
+**Role:** Three-tier journey enforcement
+
+**When to use:**
+- Agent Teams mode is enabled
+- Spawned once per wave by waves-controller
+- Works alongside quality-gate for journey-specific verification
+
+**Capabilities:**
+- Maps which journeys are affected by which issues
+- Ensures per-issue journey tests pass before closure (Tier 1)
+- Validates cross-issue journey integrity after wave completion (Tier 2)
+- Runs full journey regression before merge (Tier 3)
+- Produces release readiness verdict (APPROVED or BLOCKED)
+
+---
+
+### PROTOCOL
+
+**Role:** Communication protocol reference document
+
+**Note:** PROTOCOL is not an executable agent. It is a reference document (`scripts/agents/PROTOCOL.md`) that defines all valid inter-agent message types, required fields, and expected responses.
+
+**Contents:**
+- All message types (REQUEST_MIGRATION, MIGRATION_ASSIGNED, TOUCHING_FILE, etc.)
+- Required payload fields per message type
+- Expected response patterns
+- Error handling conventions
+
+**See:** [Communication Protocol table](/agent-system/agent-teams/#communication-protocol)
+
+---
+
 ## Agent Invocation Patterns
 
 ### Method 1: Let waves-controller Orchestrate (Recommended)
@@ -665,6 +773,33 @@ Read scripts/agents/specflow-writer.md, then create contracts for issue #42
 **Cons:**
 - Much slower (no parallelism)
 - Manual coordination required
+
+---
+
+### Method 4: Agent Teams (Recommended for large backlogs)
+
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true
+```
+
+Then:
+```
+Execute waves
+```
+
+**Pros:**
+- Persistent context (agents fix their own bugs)
+- Peer-to-peer coordination (less overhead)
+- 3-5x faster than manual workflows
+- Three-tier journey enforcement
+- Migration conflict detection (db-coordinator)
+- Automatic regression baseline tracking
+
+**Cons:**
+- Requires Claude Code 4.6+ with TeammateTool API
+- Higher memory usage (persistent agent context)
+
+**[Full Agent Teams Documentation -->](/agent-system/agent-teams/)**
 
 ---
 
@@ -767,6 +902,11 @@ Now specflow-writer also generates contract tests (previously separate agent).
 | **board-auditor** | Workflow | Weekly health check | 30-45 min |
 | **sprint-executor** | Workflow | Sprint start | 2-4x |
 | **specflow-uplifter** | Workflow | Mid-project adoption | 2-3 hours |
+| **issue-lifecycle** | Agent Teams | Per-issue full lifecycle | 4-6 hours |
+| **db-coordinator** | Agent Teams | Migration conflict prevention | 30-60 min |
+| **quality-gate** | Agent Teams | Three-tier test execution | 15-30 min |
+| **journey-gate** | Agent Teams | Journey enforcement (3 tiers) | 20-30 min |
+| **PROTOCOL** | Agent Teams | Communication reference | N/A (reference) |
 
 **Total potential time savings per feature:** 4-6 hours → 20-30 minutes
 
@@ -775,6 +915,7 @@ Now specflow-writer also generates contract tests (previously separate agent).
 ## Next Steps
 
 - **[waves-controller Deep Dive](/agent-system/waves-controller/)** — Understand 8-phase orchestration
+- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination
 - **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
 - **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts
 
@@ -784,7 +925,7 @@ Now specflow-writer also generates contract tests (previously separate agent).
 
 > **TypeScript has tools: `tsc`, `ts-node`, `tslint`.**
 >
-> **Specflow has agents: 18 specialized LLM workers.**
+> **Specflow has agents: 23+ specialized LLM workers.**
 
 Each agent is a compiler for a specific domain.
 

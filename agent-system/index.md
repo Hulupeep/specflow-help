@@ -9,7 +9,7 @@ permalink: /agent-system/
 # Agent System
 {: .no_toc }
 
-18+ specialized agents orchestrated by waves-controller.
+23+ specialized agents orchestrated by waves-controller.
 {: .fs-6 .fw-300 }
 
 ---
@@ -19,18 +19,18 @@ permalink: /agent-system/
 Specflow uses an **agent-first approach** powered by the **DPAO methodology** (Discovery → Parallel → Analysis → Orchestration):
 
 - **waves-controller**: Orchestrates all agents (8 phases)
-- **18+ specialized agents**: Each with specific triggers, inputs, outputs
-- **Parallel execution**: 3-4x faster than sequential workflows
+- **23+ specialized agents**: Each with specific triggers, inputs, outputs
+- **Parallel execution**: 3-5x faster than sequential workflows
+- **Agent Teams**: Persistent peer-to-peer teammates via Claude Code 4.6 TeammateTool API
 
 ---
 
-## Coming Soon
+## Documentation
 
-Full agent documentation is under development. Check back soon for:
-
-- waves-controller Deep Dive (8 phases)
-- Agent Reference (all 18 agents)
-- DPAO Methodology Explained
-- Customizing Agent Workflows
+- **[waves-controller Deep Dive](/agent-system/waves-controller/)** — 8-phase orchestration methodology
+- **[Agent Reference](/agent-system/agent-reference/)** — All 23+ agents and when to use them
+- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination (new)
+- **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
+- **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts for your workflow
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)

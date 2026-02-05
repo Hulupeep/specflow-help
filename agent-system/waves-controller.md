@@ -555,6 +555,132 @@ Execute waves
 
 ---
 
+## Agent Teams Mode
+
+When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` is set, waves-controller automatically adapts its execution model from hub-and-spoke subagent dispatching to persistent peer-to-peer teammate coordination.
+
+### Auto-Detection
+
+waves-controller checks for the environment variable at startup:
+
+```
+Phase 0: Environment Detection
+
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true detected
+  → Switching to Agent Teams mode
+  → TeammateTool API available
+  → Peer-to-peer coordination enabled
+```
+
+If the variable is not set, waves-controller proceeds with standard subagent mode. No configuration changes required.
+
+### Phase Changes in Agent Teams Mode
+
+Several phases are modified or extended when running in teams mode:
+
+#### Phase 2: Team Spawning (replaces Wave Planning)
+
+Instead of planning which subagents to spawn per issue, waves-controller uses `TeammateTool(spawnTeam)` to create persistent teammates:
+
+```javascript
+TeammateTool.spawnTeam({
+  teammates: [
+    { role: "issue-lifecycle", issue: "#42", persistent: true },
+    { role: "issue-lifecycle", issue: "#43", persistent: true },
+    { role: "issue-lifecycle", issue: "#44", persistent: true },
+    { role: "db-coordinator", persistent: true },
+    { role: "quality-gate", persistent: true },
+    { role: "journey-gate", persistent: true }
+  ]
+})
+```
+
+Each issue-lifecycle teammate handles all phases (contracts, migration, implementation, testing) for its issue. The coordinator agents (db-coordinator, quality-gate, journey-gate) are shared across the wave.
+
+#### Phases 3-5: Self-Coordination (replaces Agent Spawning + Parallel Execution + Validation)
+
+In subagent mode, waves-controller explicitly spawns agents, monitors execution, and triggers validation. In teams mode, **teammates self-coordinate**:
+
+- issue-lifecycle agents request migration numbers from db-coordinator
+- issue-lifecycle agents broadcast file modifications to avoid conflicts
+- issue-lifecycle agents request test execution from quality-gate
+- quality-gate returns results directly to the requesting teammate
+- Teammates fix their own test failures (persistent context)
+
+waves-controller only observes and receives `ISSUE_COMPLETE` / `ISSUE_BLOCKED` messages.
+
+#### Phase 6b: Wave Gate (new)
+
+After all issues in a wave pass their individual Tier 1 gates, waves-controller triggers the Wave Gate:
+
+```
+waves-controller → quality-gate: RUN_WAVE_GATE
+quality-gate:
+  → Run all contract tests
+  → Run all E2E tests
+  → Compare against .specflow/baseline.json
+  → Report: WAVE_APPROVED or WAVE_REJECTED
+```
+
+If the wave gate fails, waves-controller identifies which issue caused the regression and re-opens it for the responsible issue-lifecycle teammate to fix.
+
+#### Phase 6c: Regression Gate (new)
+
+After the final wave completes, before any merge to main:
+
+```
+waves-controller → quality-gate: RUN_REGRESSION
+quality-gate:
+  → Run full test suite (contracts + E2E + build)
+  → Compare against .specflow/baseline.json
+  → Check .claude/.defer-journal for deferred failures
+  → Report: WAVE_APPROVED (safe to merge) or WAVE_REJECTED (regressions found)
+```
+
+This is the final checkpoint. No code merges to main unless the regression gate passes.
+
+#### Phase 7b: Graceful Shutdown (new)
+
+After all waves complete and the regression gate passes, waves-controller performs graceful shutdown:
+
+```
+waves-controller:
+  → Broadcast SHUTDOWN to all teammates
+  → Wait for teammates to persist any final state
+  → Collect final metrics from each teammate
+  → Update .specflow/baseline.json with new test counts
+  → Generate final report (Phase 8)
+```
+
+### Benefits of Agent Teams Mode
+
+| Benefit | Details |
+|---------|---------|
+| **3-5x faster** | Less coordination overhead, persistent context eliminates re-reading |
+| **Persistent context** | Agents remember their own code and can self-repair failures |
+| **Parallel with coordination** | Agents work in parallel but coordinate directly (no bottleneck) |
+| **Migration safety** | db-coordinator prevents migration number collisions |
+| **Three-tier testing** | Graduated quality gates match scope to phase |
+| **Regression tracking** | Baseline comparison prevents silent regressions |
+| **Graceful degradation** | Falls back to subagent mode without env var |
+
+### Agent Teams Phase Summary
+
+| Phase | Subagent Mode | Agent Teams Mode |
+|-------|---------------|-----------------|
+| 1 | Discovery | Discovery (same) |
+| 2 | Wave Planning | **Team Spawning** |
+| 3 | Agent Spawning | **Self-Coordination** |
+| 4 | Parallel Execution | **Self-Coordination** |
+| 5 | Validation | **Self-Coordination** |
+| 6 | Quality Gates | Quality Gates + **6b: Wave Gate** + **6c: Regression Gate** |
+| 7 | Issue Closure | Issue Closure + **7b: Graceful Shutdown** |
+| 8 | Reporting | Reporting (same) |
+
+**[Full Agent Teams Documentation -->](/agent-system/agent-teams/)**
+
+---
+
 ## Error Handling
 
 ### When Tests Fail
@@ -639,7 +765,8 @@ priority_weights:
 
 ## Next Steps
 
-- **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 18 agents
+- **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 23+ agents
+- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination
 - **[DPAO Methodology](/agent-system/dpao/)** — Deep dive into parallel execution
 - **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts for your workflow
 
