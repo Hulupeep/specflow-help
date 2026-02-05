@@ -95,8 +95,35 @@ Specflow isn't just a framework. It's a **methodology** powered by 18 specialize
 - **Feature Contracts**: Architectural rules that must hold (invariants)
 - **Journey Contracts**: End-to-end workflows that define "done"
 - **Automated Testing**: Playwright E2E tests enforce contracts
+- **Journey Verification Hooks**: Automatic E2E execution at build boundaries
 - **Agent Orchestration**: DPAO methodology (Discovery → Parallel → Analysis → Orchestration)
 - **Academic Foundation**: 40+ years of CS research (DbC, Property Testing, MDE)
+
+---
+
+## Journey Verification Hooks
+
+**Problem:** You forget to run E2E tests. Production breaks.
+
+**Solution:** Hooks make Claude run tests automatically.
+
+| Without Hooks | With Hooks |
+|---------------|------------|
+| You: "Run tests" | [HOOK fires automatically] |
+| You forget → prod breaks | Can't forget |
+| "Tests passed" (vague) | WHERE/WHAT/HOW MANY (explicit) |
+
+```bash
+# Install hooks
+bash install-hooks.sh /path/to/project
+```
+
+Hooks trigger at build boundaries:
+- **PRE-BUILD** → Run baseline (LOCAL)
+- **POST-BUILD** → Verify changes (LOCAL)
+- **POST-COMMIT** → Verify production (PRODUCTION URL)
+
+[Learn More →](/advanced/journey-verification-hooks/)
 
 ---
 

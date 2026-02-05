@@ -88,7 +88,36 @@ This adds:
 - `Specflow/` — Core methodology files
 - `scripts/agents/` — 18 agent prompts
 - `docs/contracts/` — Contract storage
+- `.claude/hooks/` — Journey verification hooks
 - Updated `.gitignore` — Excludes agent temp files
+
+### Install Journey Verification Hooks (Recommended)
+
+Hooks make Claude run E2E tests automatically at build boundaries:
+
+```bash
+# If using extract-to-project.sh, hooks are included
+# If installing separately:
+bash /tmp/specflow/install-hooks.sh /path/to/your-project
+
+# Output:
+# ✓ Created .claude/hooks/
+# ✓ Installed .claude/settings.json
+# ✓ Installed journey-verification.md
+```
+
+Then add configuration to your `CLAUDE.md`:
+
+```markdown
+## Test Configuration
+
+- **Package Manager:** pnpm
+- **Test Command:** `pnpm test:e2e`
+- **Production URL:** `https://yourapp.com`
+- **Deploy Platform:** Vercel
+```
+
+**Why hooks?** Without them, you ask "run tests" manually. You'll forget. Production breaks.
 
 ### Method 2: Fresh Project Setup
 

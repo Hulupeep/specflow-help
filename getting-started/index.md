@@ -69,6 +69,10 @@ git clone https://github.com/Hulupeep/Specflow.git
 cp -r Specflow/scripts/agents your-project/scripts/
 cp Specflow/CLAUDE.md your-project/  # Optional: Agent invocation guide
 
+# 3. Install journey verification hooks (recommended)
+bash Specflow/install-hooks.sh your-project/
+# Hooks make Claude run E2E tests automatically at build boundaries
+
 # 3. Set up Claude Code (or your preferred LLM interface)
 # Install: https://claude.ai/download
 
@@ -157,6 +161,7 @@ If the test fails, the build fails. **No manual review needed.**
 ## Next Steps
 
 - **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on your own project
+- **[Install Hooks](/advanced/journey-verification-hooks/)** — Auto-run E2E tests at build boundaries
 - **[Understand Contracts](/core-concepts/contracts/)** — Learn what contracts enforce
 - **[Explore Agents](/agent-system/)** — Dive into the 18 agent types
 - **[Read the Background](/background/)** — Understand the academic foundation
