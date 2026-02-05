@@ -19,9 +19,9 @@ Manual setup, custom agents, and CI/CD integration.
 This section covers advanced workflows for power users:
 
 - **[Journey Verification Hooks](/advanced/journey-verification-hooks/)** — Automatic E2E test execution
+- **[CI/CD Integration](/advanced/ci-integration/)** — Running Specflow in GitHub Actions (fail-fast pipeline)
 - **[Manual Contract Creation](/advanced/manual-contracts/)** — Writing YAML contracts by hand
 - **[Journey Testing](/advanced/journey-testing/)** — End-to-end user journey tests
-- **CI/CD Integration** — Running Specflow in GitHub Actions
 
 **Note:** Most users should start with the [agent-first workflow](/getting-started/). Manual setup is 3-4x slower but gives more control.
 
@@ -44,13 +44,26 @@ See [Journey Verification Hooks](/advanced/journey-verification-hooks/) for setu
 
 ---
 
-## Coming Soon
+## Quick Links
 
-Full advanced content is under development. Check back soon for:
+| Topic | What You'll Learn |
+|-------|-------------------|
+| [Journey Verification Hooks](/advanced/journey-verification-hooks/) | Make Claude run tests automatically at build/commit boundaries |
+| [CI/CD Integration](/advanced/ci-integration/) | The fail-fast pipeline pattern with `needs: contract-tests` |
+| [Manual Contract Creation](/advanced/manual-contracts/) | Write YAML contracts by hand when needed |
+| [Journey Testing](/advanced/journey-testing/) | Create end-to-end user journey tests with Playwright |
 
-- Writing Contracts Manually (YAML authoring)
-- Custom Agent Creation (prompt templates)
-- GitHub Actions Integration
-- Schema Reference
+---
+
+## The Two Enforcement Layers
+
+Specflow uses **local hooks** AND **remote CI** together:
+
+| Layer | Where | When | Speed |
+|-------|-------|------|-------|
+| **Hooks** | Your machine | Build, commit | Seconds |
+| **CI** | GitHub | PR, merge | Minutes |
+
+**Hooks** catch problems before you push. **CI** is the authoritative gate.
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)
