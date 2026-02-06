@@ -29,7 +29,7 @@ Get up and running with Specflow in under 5 minutes.
 The fastest way to use Specflow is to let **agents do the work**:
 
 1. You define what matters (GitHub issues, requirements)
-2. `waves-controller` orchestrates 18+ specialized agents
+2. `waves-controller` orchestrates 23+ specialized agents
 3. Agents generate contracts, migrations, tests, implementation
 4. Tests enforce architectural boundaries automatically
 5. You ship (or stop if contracts fail)
@@ -163,7 +163,8 @@ If the test fails, the build fails. **No manual review needed.**
 - **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on your own project
 - **[Install Hooks](/advanced/journey-verification-hooks/)** — Auto-run E2E tests at build boundaries
 - **[Understand Contracts](/core-concepts/contracts/)** — Learn what contracts enforce
-- **[Explore Agents](/agent-system/)** — Dive into the 18 agent types
+- **[Explore Agents](/agent-system/)** — Dive into the 23+ agent types
+- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination (Claude Code 4.6+)
 - **[Read the Background](/background/)** — Understand the academic foundation
 
 ---

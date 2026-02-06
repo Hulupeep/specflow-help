@@ -9,7 +9,7 @@ permalink: /core-concepts/agents/
 # How Agents Work Together
 {: .no_toc }
 
-18 specialized LLM agents orchestrated by waves-controller.
+23+ specialized LLM agents orchestrated by waves-controller.
 {: .fs-6 .fw-300 }
 
 ---
@@ -60,7 +60,7 @@ An **agent** is a specialized LLM-powered worker with:
 
 ---
 
-## The 18 Agents
+## The Agents
 
 ### Orchestration Agent
 
@@ -545,7 +545,7 @@ Then reference it in waves-controller or invoke manually.
 ## Next Steps
 
 - **[waves-controller Deep Dive](/agent-system/waves-controller/)** — Understand the 8-phase orchestration
-- **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 18 agents
+- **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 23+ agents
 - **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
 
 ---

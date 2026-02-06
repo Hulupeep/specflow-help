@@ -1,22 +1,50 @@
----
-layout: default
-title: Workflow Guide
-parent: Agent System
-nav_order: 2
----
-
 # Specflow Workflow
 
-## What You Do
+## What This Is
+
+These agents make Specflow work with Claude Code's **Task tool as the orchestrator**. They ensure your GitHub issues have **ARCH**, **FEAT**, and **JOURNEY** contracts that can be executed:
+
+- **At build time** — Jest pattern tests catch architectural violations (`npm test -- contracts`)
+- **Post-build** — Playwright tests verify user journeys work end-to-end
+
+This three-layer approach reduces architectural drift and ensures work meets Definition of Done.
 
 ```
-1. Point at issues     →  "Make #107-#112 specflow-compliant"
-2. Generate contracts  →  "Create YAML contracts for these"
-3. Execute build       →  "Run the sprint"
-4. Validate & close    →  "Check readiness, close tickets"
+ARCH contracts  → Build fails if: forbidden patterns in code
+FEAT contracts  → Build fails if: required patterns missing
+JOURNEY contracts → Release blocked if: user flows don't work
 ```
 
-The agents handle the details. You provide direction and review results.
+---
+
+## How You Use It
+
+You give Claude Code a high-level goal. It figures out which agents to call.
+
+**High-level prompt:**
+```
+"Create tasks to make sure all stories in TODO status are specflow-compliant,
+that all contracts are created, and every UI story has a journey contract
+with Playwright tests."
+```
+
+Claude Code will:
+1. Run `board-auditor` to check compliance
+2. Run `specflow-uplifter` on non-compliant issues
+3. Run `contract-generator` to create YAML contracts
+4. Run `contract-test-generator` to create Jest tests
+5. Run `journey-enforcer` to check journey coverage
+6. Run `playwright-from-specflow` and `journey-tester` to create Playwright tests
+
+**You don't need to name agents explicitly.** Just describe what you want. The agents are documented so Claude Code knows when to use each one.
+
+**But you can be specific if you prefer:**
+```
+"Run board-auditor on issues #42-#48"
+"Run journey-tester for J-AUTH-LOGIN"
+```
+
+Both approaches work. High-level prompts for convenience; specific commands for control.
 
 ---
 
@@ -25,50 +53,61 @@ The agents handle the details. You provide direction and review results.
 ### Morning: Prep the Sprint
 
 ```
-YOU: "Run board-auditor on all open issues labeled 'admin'"
+YOU: "Run board-auditor on all open issues labeled 'feature'"
 
-CLAUDE: [Spawns board-auditor agent]
+CLAUDE: [Spawns board-auditor agent via Task tool]
 
 AGENT RETURNS:
   Compliance Matrix:
-  #107 Zone CRUD         Ghk=Y SQL=Y RLS=N TSi=Y Jrn=N  → Partial
-  #108 Zone Reorder      Ghk=Y SQL=Y RLS=Y TSi=Y Jrn=N  → Partial
-  #109 Default Zone      Ghk=N SQL=Y RLS=Y TSi=N Jrn=N  → Partial
+  #42 User Profile      Ghk=Y SQL=Y RLS=N TSi=Y Jrn=N  → Partial
+  #43 Settings Page     Ghk=Y SQL=Y RLS=Y TSi=Y Jrn=N  → Partial
+  #44 Password Reset    Ghk=N SQL=Y RLS=Y TSi=N Jrn=N  → Partial
 
   3 issues need work before sprint.
 
-YOU: "Run specflow-uplifter on #107, #108, #109 — add missing sections"
+YOU: "Run specflow-uplifter on #42, #43, #44 — add missing sections"
 
 CLAUDE: [Spawns 3 specflow-uplifter agents in parallel]
 
 AGENTS RETURN:
-  #107: Added RLS policy, added J-ADM-ZONE-CRUD journey reference
-  #108: Added J-ADM-ZONE-CRUD journey reference
-  #109: Added Gherkin scenarios, TypeScript interface, journey reference
+  #42: Added RLS policy, added J-USR-PROFILE journey reference
+  #43: Added J-USR-SETTINGS journey reference
+  #44: Added Gherkin scenarios, TypeScript interface, journey reference
 ```
 
-### Mid-Morning: Generate Contracts
+### Mid-Morning: Generate Contracts and Tests
 
 ```
-YOU: "Generate YAML contracts for the admin zone features"
+YOU: "Generate all contracts and tests for the user management features"
 
-CLAUDE: [Spawns contract-generator agent]
+CLAUDE: [Figures out which agents to call, spawns them]
+
+  1. contract-generator → Creates YAML contracts from issue specs:
+     - docs/contracts/feature_architecture.yml (ARCH-001, ARCH-002)
+     - docs/contracts/feature_user_management.yml (USR-001, USR-002, USR-003)
+     - docs/contracts/journey_user_profile.yml (J-USR-PROFILE)
+
+  2. contract-test-generator → Creates Jest tests from YAML:
+     - src/__tests__/contracts/architecture.test.ts
+     - src/__tests__/contracts/user_management.test.ts
+
+  3. playwright-from-specflow → Creates Playwright tests from Gherkin:
+     - tests/e2e/user-profile.spec.ts
+     - tests/e2e/settings.spec.ts
+
+  4. journey-tester → Creates journey tests from journey contracts:
+     - tests/e2e/journeys/user-profile.journey.spec.ts
 
 AGENT RETURNS:
   Created:
-  - docs/contracts/feature_admin_zones.yml (ADM-003, ADM-004, ADM-006)
-  - docs/contracts/journey_admin_zone_crud.yml (J-ADM-ZONE-CRUD)
-  - Updated CONTRACT_INDEX.yml
+  - 3 YAML contracts (ARCH, FEAT, JOURNEY)
+  - 2 Jest test files (run at: npm test -- contracts)
+  - 3 Playwright test files (run at: npx playwright test)
+```
 
-YOU: "Generate Jest tests for the contracts"
-
-CLAUDE: [Spawns contract-test-generator agent]
-
-AGENT RETURNS:
-  Created:
-  - src/__tests__/contracts/admin_zones.test.ts
-
-  Run: npm test -- contracts
+Or be specific if you prefer:
+```
+YOU: "Run contract-generator on #42-#44, then contract-test-generator"
 ```
 
 ### Afternoon: Build
@@ -79,25 +118,27 @@ YOU: "Map dependencies and show me the sprint waves"
 CLAUDE: [Spawns dependency-mapper agent]
 
 AGENT RETURNS:
-  Wave 0 (no dependencies): #109 (default zone trigger)
-  Wave 1 (depends on #109): #107 (zone CRUD), #108 (zone reorder)
+  Wave 0 (no dependencies): #44 (password reset - standalone)
+  Wave 1 (depends on #44): #42 (user profile), #43 (settings page)
 
-YOU: "Execute wave 0, then wave 1. Last migration was 035."
+YOU: "Execute wave 0, then wave 1. Last migration was 015."
 
 CLAUDE: [Spawns sprint-executor, which dispatches:]
   Wave 0:
-    - migration-builder for #109 → creates 036_default_zone_trigger.sql
+    - migration-builder for #44 → creates 016_password_reset.sql
 
   Wave 1 (after 0 completes):
-    - migration-builder for #107 → creates 037_zone_crud.sql
-    - migration-builder for #108 → creates 038_zone_reorder.sql
-    - frontend-builder for #107 → creates useZones hook
-    - frontend-builder for #108 → creates useZoneReorder hook
+    - migration-builder for #42 → creates 017_user_profile.sql
+    - migration-builder for #43 → creates 018_settings.sql
+    - frontend-builder for #42 → creates useProfile hook
+    - frontend-builder for #43 → creates useSettings hook
 
 BUILD: npm test -- contracts
-  ✓ ADM-003: Zone minimum constraint
-  ✓ ADM-004: Zone name uniqueness
-  ✓ ADM-006: Admin mutations audited
+  ✓ ARCH-001: No direct DB calls in components
+  ✓ ARCH-002: Auth context required
+  ✓ USR-001: Profile data validation
+  ✓ USR-002: Settings access control
+  ✓ USR-003: Password requirements enforced
 ```
 
 ### End of Day: Validate & Close
@@ -108,21 +149,80 @@ YOU: "Validate and check release readiness"
 CLAUDE: [Spawns contract-validator, then journey-enforcer]
 
 RETURNS:
-  Contracts: All satisfied
+  ARCH/FEAT Contracts: All satisfied
   Critical Journeys:
-  - J-ADM-ZONE-CRUD: ✓ passing
-  - J-LEAVE-LIFECYCLE: ✓ passing
-  - J-PAYROLL-EXPORT: ⚠️ no test
+  - J-USR-PROFILE: ✓ passing
+  - J-AUTH-LOGIN: ✓ passing
+  - J-CHECKOUT-FLOW: ⚠️ no test
 
   Status: NOT READY (1 critical journey untested)
 
-YOU: "Generate the payroll export journey test"
+YOU: "Generate the checkout journey test"
 
 CLAUDE: [Spawns journey-tester agent]
 
-YOU: "Now close #107, #108, #109"
+YOU: "Now close #42, #43, #44"
 
 CLAUDE: [Spawns ticket-closer agent]
+```
+
+---
+
+## Who Generates What (And When)
+
+| What | Agent | Input | Output | When to Run |
+|------|-------|-------|--------|-------------|
+| **YAML contracts** | `contract-generator` | Issue specs (Gherkin, SQL, journeys) | `docs/contracts/*.yml` | After issues are specflow-compliant |
+| **Jest pattern tests** | `contract-test-generator` | YAML contracts | `src/__tests__/contracts/*.test.ts` | After YAML contracts exist |
+| **Playwright feature tests** | `playwright-from-specflow` | Gherkin scenarios in issues | `tests/e2e/*.spec.ts` | After implementation or alongside |
+| **Playwright journey tests** | `journey-tester` | Journey contracts in issues/epics | `tests/e2e/journeys/*.journey.spec.ts` | After implementation or alongside |
+
+**The flow:**
+```
+Issues with specs → YAML contracts → Jest tests → BUILD
+                                   ↘
+                    Gherkin/Journeys → Playwright tests → POST-BUILD
+```
+
+**Key insight:** Jest tests come from YAML contracts. Playwright tests come from issue content (Gherkin + journeys). Both can be generated before or after implementation — they test what SHOULD happen, not what currently exists.
+
+---
+
+## The Three Layers
+
+| Layer | What It Enforces | When It Runs | Failure Mode |
+|-------|------------------|--------------|--------------|
+| **ARCH** | Structural invariants | `npm test` | Build fails |
+| **FEAT** | Feature requirements | `npm test` | Build fails |
+| **JOURNEY** | User flows work | Playwright | Release blocked |
+
+**Example ARCH contract:**
+```yaml
+- id: ARCH-001
+  forbidden_patterns:
+    - pattern: /supabase\.(from|rpc)/
+      message: "Components must use hooks, not direct DB calls"
+  scope: ["src/components/**/*.tsx"]
+```
+
+**Example FEAT contract:**
+```yaml
+- id: USR-002
+  required_patterns:
+    - pattern: /validatePassword/
+      message: "Password validation required"
+  scope: ["src/features/auth/**/*.ts"]
+```
+
+**Example JOURNEY contract:**
+```yaml
+journey_meta:
+  id: J-USR-PROFILE
+  dod_criticality: critical
+steps:
+  - name: "User updates profile"
+    required_elements:
+      - selector: "[data-testid='profile-form']"
 ```
 
 ---
@@ -134,7 +234,7 @@ Every interaction:
 ```
 YOU: [Direction] "Do X on issues Y"
      ↓
-CLAUDE: [Spawns appropriate agent(s)]
+CLAUDE: [Spawns appropriate agent(s) via Task tool]
      ↓
 AGENT: [Does work, returns result]
      ↓
@@ -145,27 +245,103 @@ You're directing traffic, not writing code.
 
 ---
 
+## Agent Teams Mode (Claude Code 4.6+)
+
+> **Requires:** `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true`
+
+The default workflow above uses **subagent mode** — Claude Code spawns one-shot Task agents that do work and return. This is the standard approach and works everywhere.
+
+**Agent Teams mode** adds a second option: **persistent peer-to-peer teammates** via the TeammateTool API. Instead of spawning disposable subagents, you spawn long-lived teammates that can communicate with each other.
+
+### When to Use Which
+
+| Mode | Best For | How It Works |
+|------|----------|--------------|
+| **Subagent** (default) | Most workflows | Task tool spawns agents → they work → they return results |
+| **Agent Teams** | Complex multi-issue waves | Persistent teammates coordinate via `sendMessage` |
+
+### Team Agents
+
+Agent Teams mode introduces 5 additional agent prompts:
+
+| Agent | Role | File |
+|-------|------|------|
+| `PROTOCOL` | Inter-agent communication rules | `agents/PROTOCOL.md` |
+| `journey-gate` | Three-tier journey enforcement | `agents/journey-gate.md` |
+| `issue-lifecycle` | Full issue lifecycle teammate | `agents/issue-lifecycle.md` |
+| `db-coordinator` | Shared database resource manager | `agents/db-coordinator.md` |
+| `quality-gate` | Test execution and quality checks | `agents/quality-gate.md` |
+
+These agents exist alongside the standard subagents. In subagent mode they work as regular Task agents. In teams mode they become persistent teammates.
+
+### Three-Tier Journey Gates
+
+Agent Teams introduces a three-tier quality gate system enforced by `journey-gate`:
+
+| Tier | Scope | When | Blocks |
+|------|-------|------|--------|
+| **Tier 1** | Single issue | Before closing an issue | Issue closure |
+| **Tier 2** | All wave issues | Before starting next wave | Next wave |
+| **Tier 3** | Full regression | Before merging to main | Merge |
+
+Tier 3 uses `.specflow/baseline.json` for regression detection — comparing current test results against a known-good baseline.
+
+### Infrastructure Files
+
+Agent Teams mode uses two additional files:
+
+- **`.specflow/baseline.json`** — Regression detection baseline (test pass/fail snapshot)
+- **`.claude/.defer-journal`** — Deferred test journal (replaces deprecated `.defer-tests`)
+
+### CI Pipeline
+
+For teams mode, a 5-gate CI pipeline is available at `.github/workflows/specflow-ci.yml`:
+
+```
+Gate 1: Contracts → Gate 2: Build → Gate 3: Tier 2 → Gate 4: Tier 3 → Gate 5: Deploy
+```
+
+See `agents/PROTOCOL.md` for inter-agent communication patterns and `agents/journey-gate.md` for gate enforcement details.
+
+### Backward Compatibility
+
+Agent Teams mode is fully backward compatible:
+
+- Without the env var, everything works as subagent mode (default)
+- All team agents work as regular Task agents in subagent mode
+- No changes needed to existing workflows
+- Existing `waves-controller` supports both modes
+
+---
+
 ## When Things Go Wrong
 
-**Build fails:**
+**ARCH violation (build fails):**
 ```
-CONTRACT VIOLATION: ADM-006 - missing audit call
-  src/features/zones/hooks/useDeleteZone.ts:42
+CONTRACT VIOLATION: ARCH-001 - direct DB call in component
+  src/components/UserCard.tsx:42 - "supabase.from('users')"
 ```
-→ "Fix the violation in useDeleteZone"
+→ "Fix the violation — use a hook instead of direct call"
 
-**Journey fails:**
+**FEAT violation (build fails):**
 ```
-Step 3: Default space auto-created → FAILED
-  Element not found: space-card
+CONTRACT VIOLATION: USR-003 - password validation missing
+  src/features/auth/hooks/usePasswordReset.ts:42
 ```
-→ "The default space isn't being created. Check the trigger."
+→ "Add password validation to usePasswordReset"
+
+**JOURNEY violation (release blocked):**
+```
+Step 3: Profile updated successfully → FAILED
+  Element not found: success-message
+```
+→ "The success message isn't showing. Check the mutation response."
 
 **Issue missing specs:**
 ```
-#112 Zone Colors - Non-compliant (missing: Gherkin, SQL)
+#56 Export Feature - Non-compliant (missing: Gherkin, SQL)
 ```
-→ "Run specflow-writer on #112"
+→ "Run specflow-writer on #56"
 
 ---
 
@@ -173,13 +349,18 @@ Step 3: Default space auto-created → FAILED
 
 **Before sprint:**
 - [ ] All issues have Gherkin, SQL, RLS, TypeScript, journey refs
-- [ ] YAML contracts generated
-- [ ] Jest tests generated
-- [ ] Dependencies mapped
+- [ ] YAML contracts generated (ARCH, FEAT, JOURNEY)
+- [ ] Jest tests generated for ARCH/FEAT contracts
+- [ ] Dependencies mapped into sprint waves
 
 **Before release:**
-- [ ] `npm test -- contracts` passes
+- [ ] `npm test -- contracts` passes (ARCH + FEAT)
 - [ ] All critical journey tests exist and pass
+
+**Agent Teams (if using teams mode):**
+- [ ] `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` set
+- [ ] `.specflow/baseline.json` exists with known-good state
+- [ ] Tier 3 regression gate passes before merge
 
 ---
 
@@ -190,4 +371,4 @@ You never write contracts by hand. Agents generate them.
 You never write tests by hand. Agents generate them.
 You never track dependencies by hand. SQL REFERENCES tells us.
 
-You point. Agents work. Build catches mistakes.
+You point. Agents work. Build catches mistakes. Release blocked if journeys fail.

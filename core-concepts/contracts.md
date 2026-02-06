@@ -488,7 +488,7 @@ Update the contract test to match.
 
 ## Next Steps
 
-- **[How Agents Work](/core-concepts/agents/)** — Learn how 18 agents generate contracts
+- **[How Agents Work](/core-concepts/agents/)** — Learn how 23+ agents generate contracts
 - **[What Are Journeys?](/core-concepts/journeys/)** — Understand end-to-end workflows
 - **[Manual Contract Creation](/advanced/manual-contracts/)** — Write contracts by hand
 

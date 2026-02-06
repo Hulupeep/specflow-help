@@ -377,6 +377,122 @@ Add these to your `package.json`:
 
 ---
 
+## Agent Teams CI Pipeline (5 Gates)
+
+When using [Agent Teams mode](/agent-system/agent-teams/), a more comprehensive CI pipeline is available with three-tier journey enforcement.
+
+**File:** `.github/workflows/specflow-ci.yml`
+
+```yaml
+# .github/workflows/specflow-ci.yml
+name: Specflow CI (Agent Teams)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # Gate 1: Contract Tests (pattern enforcement)
+  gate-1-contracts:
+    name: "Gate 1: Contracts"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test -- contracts --passWithNoTests
+
+  # Gate 2: Build
+  gate-2-build:
+    name: "Gate 2: Build"
+    needs: gate-1-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+  # Gate 3: Tier 2 Journey Tests (wave-level)
+  gate-3-tier2:
+    name: "Gate 3: Tier 2 Journey Tests"
+    needs: gate-2-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e tests/e2e/journey_*.spec.ts
+
+  # Gate 4: Tier 3 Regression (baseline comparison)
+  gate-4-tier3:
+    name: "Gate 4: Tier 3 Regression"
+    needs: gate-3-tier2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run full E2E suite
+        run: pnpm test:e2e --reporter=json > test-results.json 2>&1 || true
+      - name: Compare against baseline
+        run: |
+          if [ -f .specflow/baseline.json ]; then
+            node -e "
+              const baseline = require('./.specflow/baseline.json');
+              const results = require('./test-results.json');
+              // Compare and fail on regressions
+              const regressions = baseline.passing.filter(t => !results.passing?.includes(t));
+              if (regressions.length > 0) {
+                console.error('REGRESSIONS:', regressions);
+                process.exit(1);
+              }
+            "
+          fi
+
+  # Gate 5: Deploy (only on main)
+  gate-5-deploy:
+    name: "Gate 5: Deploy"
+    needs: gate-4-tier3
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All gates passed. Deployment proceeds via platform (Vercel, etc.)"
+```
+
+### Key Differences from Standard Pipeline
+
+| Standard Pipeline | Agent Teams Pipeline |
+|-------------------|---------------------|
+| 4 parallel jobs | 5 sequential gates |
+| Journey tests run once | Tier 2 (wave) + Tier 3 (regression) |
+| No baseline comparison | `.specflow/baseline.json` regression detection |
+| Manual criticality filtering | Automatic tier enforcement |
+
+> **Note:** The standard pipeline above works for most projects. The Agent Teams pipeline is for projects using persistent teammates and three-tier journey gates. See [Agent Teams](/agent-system/agent-teams/) for details.
+
+---
+
 ## Summary
 
 | Principle | Implementation |
@@ -386,5 +502,6 @@ Add these to your `package.json`:
 | Remote enforcement | CI pipeline with branch protection |
 | Criticality gating | `--grep "@critical"` |
 | Save CI minutes | Skip E2E if contracts fail |
+| Three-tier gates | Agent Teams mode with `.specflow/baseline.json` |
 
 **The key insight:** Contracts are cheap to check. Check them first, skip expensive tests on failure.

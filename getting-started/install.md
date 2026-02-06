@@ -86,7 +86,7 @@ cd /path/to/your-project
 
 This adds:
 - `Specflow/` — Core methodology files
-- `scripts/agents/` — 18 agent prompts
+- `scripts/agents/` — 23+ agent prompts
 - `docs/contracts/` — Contract storage
 - `.claude/hooks/` — Journey verification hooks
 - Updated `.gitignore` — Excludes agent temp files
@@ -183,7 +183,7 @@ If you used Method 1, run the verification script:
 
 # Output:
 # ✓ Specflow/ directory found
-# ✓ scripts/agents/ directory found (18 agents)
+# ✓ scripts/agents/ directory found (23+ agents)
 # ✓ docs/contracts/ directory found
 # ✓ CLAUDE.md or .clauderc configured
 # ✓ GitHub CLI authenticated
@@ -277,7 +277,7 @@ Located in `scripts/agents/`:
 | **playwright-from-specflow** | `playwright-from-specflow.md` | Creates E2E tests from Gherkin |
 | **contract-validator** | `contract-validator.md` | Verifies implementation |
 | **test-runner** | `test-runner.md` | Executes tests, reports failures |
-| ... | (18 total) | See `scripts/agents/README.md` |
+| ... | (23+ total) | See `scripts/agents/README.md` |
 
 ### Contract Storage
 
@@ -297,7 +297,7 @@ Now that Specflow is installed:
 
 1. **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on a GitHub issue
 2. **[Understand Output](/getting-started/understanding-output/)** — Learn to read contracts and test results
-3. **[Explore Agents](/agent-system/)** — Dive deeper into the 18 agent types
+3. **[Explore Agents](/agent-system/)** — Dive deeper into the 23+ agent types
 
 ---
 

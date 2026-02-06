@@ -170,7 +170,7 @@ DPAO enforces quality at each wave:
 **Setup:**
 - 9 GitHub issues
 - 2 waves calculated
-- 18 specialized agents
+- 23+ specialized agents
 
 **Execution:**
 - **Wave 1:** 6 independent issues (parallel)
@@ -252,7 +252,7 @@ DPAO enforces quality at each wave:
 ## Next Steps
 
 - **[waves-controller Deep Dive](/agent-system/waves-controller/)** — Learn the 8-phase orchestration
-- **[Agent Reference](/agent-system/agent-reference/)** — See all 18 agent types
+- **[Agent Reference](/agent-system/agent-reference/)** — See all 23+ agent types
 - **[Contract Extensions](https://github.com/Hulupeep/Specflow/blob/main/CONTRACT-SCHEMA-EXTENSIONS.md)** — Reduce failure rates
 
 ---

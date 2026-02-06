@@ -16,7 +16,7 @@ Specflow enforces architectural contracts like a compiler enforces types. It's d
 
 - **Feature Contracts**: Architectural invariants that must hold (e.g., "Leave approval MUST debit balance")
 - **Journey Contracts**: End-to-end workflows that define "done"
-- **Agent-First Workflow**: 18+ specialized LLM agents orchestrated by `waves-controller`
+- **Agent-First Workflow**: 23+ specialized LLM agents orchestrated by `waves-controller`
 - **Automated Testing**: Playwright E2E tests enforce all contracts
 - **DPAO Methodology**: Discovery → Parallel → Analysis → Orchestration (3-4x faster)
 

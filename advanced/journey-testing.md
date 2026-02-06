@@ -587,9 +587,41 @@ test.afterEach(async () => {
 
 ---
 
+## Three-Tier Journey Gates (Agent Teams)
+
+When using [Agent Teams mode](/agent-system/agent-teams/), journey enforcement is automated via `journey-gate` with three tiers:
+
+| Tier | Scope | When | Blocks |
+|------|-------|------|--------|
+| **Tier 1** | Single issue | Before closing an issue | Issue closure |
+| **Tier 2** | All wave issues | Before starting next wave | Next wave |
+| **Tier 3** | Full regression | Before merging to main | Merge |
+
+**Tier 1** runs the Playwright test for a specific issue's journey contract. If it fails, the issue cannot be closed.
+
+**Tier 2** runs all journey tests for every issue in the current wave. If any critical journey fails, the next wave cannot start.
+
+**Tier 3** compares the full test suite against `.specflow/baseline.json` — a known-good snapshot of all test results. Any regression (test that was passing but now fails) blocks the merge.
+
+```bash
+# Tier 1: Check a single issue
+# journey-gate runs: pnpm test:e2e tests/e2e/journey_staff_request_leave.spec.ts
+
+# Tier 2: Check all wave issues
+# journey-gate runs all journey tests for wave issues
+
+# Tier 3: Full regression
+# journey-gate compares against .specflow/baseline.json
+```
+
+> **Note:** Three-tier gates require Agent Teams mode (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true`). In standard subagent mode, `journey-enforcer` provides coverage analysis without hard gating.
+
+---
+
 ## Next Steps
 
-- **[Agent Reference](/agent-system/agent-reference/)** — See `journey-tester` and `journey-enforcer` agents
+- **[Agent Reference](/agent-system/agent-reference/)** — See `journey-tester`, `journey-enforcer`, and `journey-gate` agents
+- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination with three-tier gates
 - **[DPAO Methodology](/agent-system/dpao/)** — Test journeys in parallel waves
 - **[Contract Schema](/reference/contract-schema/)** — Full journey contract YAML format
 

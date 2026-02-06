@@ -78,7 +78,7 @@ When code violates a contract, the build **fails** — just like a type error.
 
 ## The Agent-First Workflow
 
-Specflow isn't just a framework. It's a **methodology** powered by 18 specialized agents:
+Specflow isn't just a framework. It's a **methodology** powered by 23+ specialized agents:
 
 1. **Define contracts** (what must hold true)
 2. **Run `waves-controller`** (orchestrates agent execution)
@@ -87,6 +87,8 @@ Specflow isn't just a framework. It's a **methodology** powered by 18 specialize
 5. **Ship or stop** (no manual review needed)
 
 **3-4x faster than manual workflows.** Proven on production projects.
+
+**New: [Agent Teams](/agent-system/agent-teams/)** — Persistent peer-to-peer teammates with three-tier journey gates (requires Claude Code 4.6+).
 
 ---
 
@@ -97,6 +99,7 @@ Specflow isn't just a framework. It's a **methodology** powered by 18 specialize
 - **Automated Testing**: Playwright E2E tests enforce contracts
 - **Journey Verification Hooks**: Automatic E2E execution at build boundaries
 - **Agent Orchestration**: DPAO methodology (Discovery → Parallel → Analysis → Orchestration)
+- **Agent Teams**: Persistent peer-to-peer teammates with three-tier journey gates (Claude Code 4.6+)
 - **Academic Foundation**: 40+ years of CS research (DbC, Property Testing, MDE)
 
 ---

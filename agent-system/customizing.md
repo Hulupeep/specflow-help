@@ -455,7 +455,7 @@ Task("Deploy to Vercel production", "{deploy-to-vercel.md prompt}\n\n---\n\nBran
 
 ## Next Steps
 
-- **[Agent Reference](/agent-system/agent-reference/)** — See all 18 default agents
+- **[Agent Reference](/agent-system/agent-reference/)** — See all 23+ agents
 - **[DPAO Methodology](/agent-system/dpao/)** — Understand parallel orchestration
 - **[Manual Contracts](/advanced/manual-contracts/)** — Write contracts without agents
 

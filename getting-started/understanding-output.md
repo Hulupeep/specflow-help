@@ -553,7 +553,7 @@ Build failed. Fix journey to continue.
 Now that you understand output:
 
 1. **[Explore Core Concepts](/core-concepts/)** — Dive deeper into contracts, agents, journeys
-2. **[Browse Agent System](/agent-system/)** — Learn about the 18 agent types
+2. **[Browse Agent System](/agent-system/)** — Learn about the 23+ agent types
 3. **[Read Background](/background/)** — Understand the academic foundation
 
 ---
