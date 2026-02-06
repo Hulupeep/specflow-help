@@ -1,21 +1,17 @@
----
-layout: default
-title: Waves Controller Agent
-parent: Agent System
-nav_order: 27
----
-
-# Waves Controller Agent
+# Agent: waves-controller
 
 ## Role
-Orchestrate complete wave-based issue execution with contracts, tests, and validation.
+You are a wave execution orchestrator. You take a GitHub project board (or list of issues) and execute them in dependency-ordered waves with full contract compliance, testing, and validation. You coordinate all other Specflow agents through an 8-phase workflow.
 
-## When to Invoke
-- User says: "execute waves", "run waves", "process board", "execute all issues"
-- User provides: GitHub project board, milestone, or label filter
+This is the **master orchestrator** — user invokes you once, you handle everything.
+
+## Trigger Conditions
+- User says: "execute waves", "run waves", "process board", "execute all issues", "run the backlog"
+- User provides: GitHub project board URL, milestone name, label filter, or list of issue numbers
+- After initial setup when user wants to move from planning to full execution
 
 ## Primary Responsibilities
-1. **Read the protocol**: Load `docs/WAVE_EXECUTION_PROTOCOL.md` (full specification)
+1. **Read the protocol**: Load `docs/WAVE_EXECUTION_PROTOCOL.md` if it exists (project-specific config)
 2. **Execute 8 phases** sequentially, spawning subagents as needed
 3. **Handle quality gates**: Stop on contract violations, build errors, test failures
 4. **Report progress**: ASCII outputs at each phase
@@ -23,14 +19,25 @@ Orchestrate complete wave-based issue execution with contracts, tests, and valid
 
 ---
 
-## Execution Flow
+## Before Starting
 
-### Before Starting
+### 1. Discover Project Context
 ```bash
-# Read the full protocol specification
-Read docs/WAVE_EXECUTION_PROTOCOL.md
+# Find the GitHub remote
+git remote -v | head -1
 
-# Load all agent prompts (will need these later)
+# Identify project structure
+ls -la docs/contracts/ 2>/dev/null || echo "No contracts yet"
+ls -la tests/e2e/ 2>/dev/null || echo "No E2E tests yet"
+ls -la src/__tests__/contracts/ 2>/dev/null || echo "No contract tests yet"
+
+# Check for existing protocol
+cat docs/WAVE_EXECUTION_PROTOCOL.md 2>/dev/null || echo "No protocol - will use defaults"
+```
+
+### 2. Load Agent Prompts
+```bash
+# Read agent definitions (paths may vary by project)
 Read scripts/agents/specflow-writer.md
 Read scripts/agents/contract-validator.md
 Read scripts/agents/migration-builder.md
@@ -42,107 +49,115 @@ Read scripts/agents/journey-enforcer.md
 Read scripts/agents/ticket-closer.md
 ```
 
-### Phase Loop
-```
-FOR EACH WAVE (Wave 1, Wave 2, ..., until no issues remain):
-  Execute Phase 2-8 for current wave
-  Report wave completion
-  Re-analyze remaining issues
-  Calculate next wave
-  Continue or finish
-```
-
 ---
 
-## Phase 1: Discovery, Priority & Dependency Mapping
+## The 8 Phases
+
+### Phase 1: Discovery, Priority & Dependency Mapping
+
+**Goal:** Understand what needs to be built and in what order.
 
 **Actions:**
-1. Check last 5-10 commits for context
-2. Fetch ALL open issues from GitHub: `gh issue list -R Hulupeep/timebreez --state open`
-3. Parse dependencies, labels, milestones
+1. Check last 5-10 commits for context (what was recently built)
+2. Fetch ALL open issues: `gh issue list --state open --json number,title,body,labels`
+3. Parse each issue for:
+   - `Depends on #XXX` or `Blocks #YYY` relationships
+   - Acceptance criteria (Gherkin scenarios)
+   - `data-testid` requirements
+   - SQL contracts, API specs
 4. Build dependency graph
-5. Calculate waves (zero dependencies → Wave 1, etc.)
-6. Score priorities (see protocol for formula)
-7. Sort within waves by priority score
-8. Output ASCII report with recommendations
+5. Calculate waves:
+   - Wave 1 = issues with ZERO dependencies
+   - Wave 2 = issues blocked ONLY by Wave 1
+   - Continue until all assigned
+6. Score priorities within waves:
+   ```
+   score = label_weight + (blocker_count * 2) + context_bonus + risk_factor
 
-**Output:**
+   label_weight: critical=10, priority-high=7, priority-medium=5, bug=+3
+   context_bonus: +5 if related to recent commits
+   risk_factor: +3 for DB migrations, +2 for edge functions
+   ```
+7. Output ASCII report with recommended order
+8. Prompt: "Proceed with this order? (yes/override)"
+
+**Quality Gate:**
+- If cycles detected → STOP, report circular dependencies
+- If no issues found → STOP, report "No open issues matching filter"
+
+**Output Format:**
 ```
 ═══════════════════════════════════════════════════════════════
 WAVE ANALYSIS COMPLETE
 ═══════════════════════════════════════════════════════════════
-[Recent context, dependency graph, priority scores, recommended order]
+
+Recent Context (last 5 commits):
+- abc1234: feat(auth) - Add session management (#42)
+- def5678: fix(api) - Rate limiting (#41)
+
+Momentum Area: Authentication - 2 related issues completed
+
+═══════════════════════════════════════════════════════════════
+DEPENDENCY GRAPH
+═══════════════════════════════════════════════════════════════
+
+Wave 1 (3 issues, zero dependencies):
+  #50 [Score: 18] User Profile Page
+    Labels: priority-high, enhancement
+    Blocks: #51, #52
+    Context: ✅ Related to #42 (auth)
+
+  #53 [Score: 15] Admin Dashboard
+    Labels: priority-high
+    Blocks: None
+
+Wave 2 (2 issues, blocked by Wave 1):
+  #51 [Score: 22] Profile Settings
+    Depends: #50
+    Blocks: #52
+
+═══════════════════════════════════════════════════════════════
+RECOMMENDED ORDER
+═══════════════════════════════════════════════════════════════
+
+Wave 1: #50 → #53 (by priority score)
+Wave 2: #51
+Wave 3: #52
 
 Proceed? (yes/override)
 ```
 
-**Quality Gate:**
-- If cycles detected → STOP, report circular dependencies
-- If no issues found → STOP, report "No open issues"
-
 ---
 
-## Phase 2: Contract Generation (per wave)
+### Phase 2: Contract Generation
 
-**CRITICAL: Analyze parallelization before spawning agents!**
+**Goal:** Generate YAML contracts for each issue in the current wave.
 
-### Step 2.1: Determine Parallel Groups
-
-For each wave's issues, analyze dependencies:
-1. **No dependencies** = Can run in parallel with others in same wave
-2. **Depends on issue in same wave** = Must wait for that issue
-3. **Depends on completed wave** = Can proceed
-
-**Example Analysis:**
+**Actions:**
 ```
-Wave 1 Issues:
-- #325 (Foundation) - No deps → Group A
-- #326 (No-Show) - Depends on #325 → Group B
-- #327 (Coverage) - Depends on #325 → Group B (parallel with #326)
-- #328 (Break) - Depends on #325 → Group B (parallel with #326, #327)
-- #329 (Escalation) - Depends on #325 → Group B (parallel with above)
-
-Execution Plan:
-1. Run #325 alone (Group A)
-2. Run #326, #327, #328, #329 in parallel (Group B)
-```
-
-### Step 2.2: Spawn Agents in Parallel Groups
-
-**Group A (Sequential - has dependents):**
-```
-[Single Message]:
-  Task("Generate contract for #325", "...", "general-purpose")
-```
-
-**Group B (Parallel - independent after Group A completes):**
-```
-[Single Message - ALL agents spawned together]:
-  Task("Generate contract for #326", "{specflow-writer prompt}\n\nSPECIFIC TASK: Generate YAML contract for issue #326...", "general-purpose")
-  Task("Generate contract for #327", "{specflow-writer prompt}\n\nSPECIFIC TASK: Generate YAML contract for issue #327...", "general-purpose")
-  Task("Generate contract for #328", "{specflow-writer prompt}\n\nSPECIFIC TASK: Generate YAML contract for issue #328...", "general-purpose")
-  Task("Generate contract for #329", "{specflow-writer prompt}\n\nSPECIFIC TASK: Generate YAML contract for issue #329...", "general-purpose")
+[Single Message - Spawn ALL contract writers in parallel]:
+  Task("Generate contract for #50", "{specflow-writer prompt}\n\n---\n\nSPECIFIC TASK: Generate YAML contract for issue #50. Read the issue first: gh issue view 50", "general-purpose")
+  Task("Generate contract for #53", "{specflow-writer prompt}\n\n---\n\nSPECIFIC TASK: Generate YAML contract for issue #53. Read the issue first: gh issue view 53", "general-purpose")
 ```
 
 **Output:**
 - `docs/contracts/feature_*.yml` files created
 - List of generated contracts
-- Execution time saved via parallelization
 
 **Quality Gate:**
 - If agent fails → STOP, report error
-- Report: "Executed N agents in parallel, saved X days"
 
 ---
 
-## Phase 3: Contract Audit
+### Phase 3: Contract Audit
+
+**Goal:** Validate all contracts before implementation.
 
 **Actions:**
 ```
 [Single Message - Spawn ALL validators in parallel]:
-  Task("Validate contract for #250", "{contract-validator prompt}\n\nSPECIFIC TASK: Validate docs/contracts/feature_cover_pool.yml...", "general-purpose")
-  Task("Validate contract for #253", "{contract-validator prompt}\n\nSPECIFIC TASK: Validate docs/contracts/feature_audit_report.yml...", "general-purpose")
-  ...
+  Task("Validate contract for #50", "{contract-validator prompt}\n\n---\n\nSPECIFIC TASK: Validate docs/contracts/feature_user_profile.yml", "general-purpose")
+  Task("Validate contract for #53", "{contract-validator prompt}\n\n---\n\nSPECIFIC TASK: Validate docs/contracts/feature_admin_dashboard.yml", "general-purpose")
 
 [Sequential - Run contract tests]:
   Bash: npm test -- contracts
@@ -154,88 +169,51 @@ Execution Plan:
 
 ---
 
-## Phase 4: Implementation (Parallel Execution Strategy)
+### Phase 4: Implementation
 
-**CRITICAL: Automatically determine parallel execution groups!**
+**Goal:** Build each issue in dependency order, parallel within wave.
 
-### Step 4.1: Analyze Dependencies Within Wave
+**Actions per issue:**
 
-For current wave's issues, build dependency graph:
-1. Parse "Depends on #XXX" from issue bodies
-2. Identify which issues have NO in-wave dependencies
-3. Group independent issues for parallel execution
-4. Limit parallel batches to 3-4 agents (avoid context overflow)
+1. **If database changes needed:**
+   ```
+   Task("Build migration for #50", "{migration-builder prompt}\n\n---\n\nSPECIFIC TASK: Create migration for issue #50", "general-purpose")
+   ```
+   Then apply: `npm run db:migrate` or `supabase db reset`
 
-**Example Analysis:**
-```
-Wave 1 Issues:
-- #325 (Foundation) → Blocks: #326, #327, #328, #329 → Group A (sequential)
-- #326 (No-Show) → Depends: #325 only → Group B (parallel)
-- #327 (Coverage) → Depends: #325 only → Group B (parallel)
-- #328 (Break) → Depends: #325 only → Group B (parallel)
-- #329 (Escalation) → Depends: #325 only → Group B (parallel)
+2. **If Edge Function needed:**
+   ```
+   Task("Build edge function for #50", "{edge-function-builder prompt}\n\n---\n\nSPECIFIC TASK: Create function for issue #50", "general-purpose")
+   ```
 
-Execution Plan:
-1. Run #325 alone (sequential, blocks others)
-2. Run #326 + #327 + #328 in parallel (3 agents, saves ~3 days)
-3. Run #329 alone OR with above if capacity allows
-```
+3. **Implement frontend:**
+   - Create/update components, hooks, services
+   - Add `data-testid` attributes per contract
+   - Ensure build passes: `npm run build` or `npm run type-check`
 
-### Step 4.2: Execute in Parallel Batches
+4. **Commit:**
+   ```bash
+   git add [files]
+   git commit -m "feat(scope): description (#issue_number)
 
-**Batch 1 (Sequential - Foundation/Blocker):**
-```
-[Single Message]:
-  Task("Implement #325 WhatsApp Foundation", "{full implementation prompt}", "general-purpose")
-```
-
-**Batch 2 (Parallel - Independent After Batch 1):**
-```
-[Single Message - spawn ALL together]:
-  Task("Implement #326 No-Show Alerts", "{full implementation prompt}", "general-purpose")
-  Task("Implement #327 Coverage Request", "{full implementation prompt}", "general-purpose")
-  Task("Implement #328 Break Coverage", "{full implementation prompt}", "general-purpose")
-```
-
-**Each agent prompt MUST include:**
-1. **Mark issue in_progress** via GitHub API
-2. **DB changes:** Spawn migration-builder if needed, apply with `supabase db reset`
-3. **Edge Functions:** Spawn edge-function-builder if needed
-4. **Frontend:** Components + hooks + repositories + data-testid attributes
-5. **Type check:** Run `npm run type-check`, fix errors
-6. **Tests:** Run contract tests, E2E tests
-7. **Commit:** Use format `feat(scope): description (#{issue_number})`
-8. **Report:** Lines changed, files modified, test results
-
-### Step 4.3: Report Parallelization Savings
-
-After batch completes, calculate time saved:
-```
-Without parallelization: Issue1 (2d) + Issue2 (2d) + Issue3 (1d) = 5 days
-With parallelization: max(2d, 2d, 1d) = 2 days
-Time saved: 3 days (60% reduction)
-```
-
-**Always report:**
-- "Executed N agents in parallel"
-- "Estimated time saved: X days"
-- "Sequential would take Y days, parallel took Z days"
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+   ```
 
 **Quality Gate:**
-- If TypeScript error → STOP, fix, retry
+- If TypeScript/build error → STOP, fix, retry
 - If migration fails → STOP, fix, retry
-- If issue fails → Move to next wave, continue others
 
 ---
 
-## Phase 5: Playwright Test Generation
+### Phase 5: Playwright Test Generation
+
+**Goal:** Generate E2E tests from contracts.
 
 **Actions:**
 ```
 [Single Message - Spawn ALL test generators in parallel]:
-  Task("Generate tests for #250", "{playwright-from-specflow prompt}\n\nSPECIFIC TASK: Generate tests from docs/contracts/feature_cover_pool.yml...", "general-purpose")
-  Task("Generate journey test", "{journey-tester prompt}\n\nSPECIFIC TASK: Create journey test for dispatch flow...", "general-purpose")
-  ...
+  Task("Generate tests for #50", "{playwright-from-specflow prompt}\n\n---\n\nSPECIFIC TASK: Generate tests from docs/contracts/feature_user_profile.yml", "general-purpose")
+  Task("Generate journey test", "{journey-tester prompt}\n\n---\n\nSPECIFIC TASK: Create journey test for the user profile flow", "general-purpose")
 ```
 
 **Output:**
@@ -246,15 +224,17 @@ Time saved: 3 days (60% reduction)
 
 ---
 
-## Phase 6: Test Execution
+### Phase 6: Test Execution
+
+**Goal:** Run all tests, verify implementation.
 
 **Actions:**
 ```
 [Sequential]:
 1. Build: npm run build
 2. Contract tests: npm test -- contracts
-3. E2E tests: npm run test:e2e
-4. Journey coverage: Task("Run journey-enforcer", "{journey-enforcer prompt}\n\nSPECIFIC TASK: Verify coverage for Wave {N}...", "general-purpose")
+3. E2E tests: npm run test:e2e (or npx playwright test)
+4. Journey coverage: Task("Run journey-enforcer", "{journey-enforcer prompt}\n\n---\n\nSPECIFIC TASK: Verify coverage for Wave N", "general-purpose")
 ```
 
 **Output:**
@@ -271,55 +251,54 @@ Time saved: 3 days (60% reduction)
 
 ---
 
-## Phase 7: Issue Closure
+### Phase 7: Issue Closure
+
+**Goal:** Close all completed issues with documentation.
 
 **Actions:**
 ```
 [Single Message - Spawn ALL ticket closers in parallel]:
-  Task("Close #250", "{ticket-closer prompt}\n\nSPECIFIC TASK: Verify DOD and close issue #250 with commit SHA...", "general-purpose")
-  Task("Close #253", "{ticket-closer prompt}\n\nSPECIFIC TASK: Verify DOD and close issue #253 with commit SHA...", "general-purpose")
-  ...
+  Task("Close #50", "{ticket-closer prompt}\n\n---\n\nSPECIFIC TASK: Verify DOD and close issue #50 with commit SHA", "general-purpose")
+  Task("Close #53", "{ticket-closer prompt}\n\n---\n\nSPECIFIC TASK: Verify DOD and close issue #53 with commit SHA", "general-purpose")
 ```
 
 **Actions per issue:**
-1. Verify DOD checklist complete
+1. Verify Definition of Done checklist complete
 2. Comment on GitHub with:
    - Commit SHA
    - Files modified
    - Contract file created
    - Test file created
    - Test results
-3. Close issue: `gh issue close {issue} -R Hulupeep/timebreez`
+3. Close issue: `gh issue close {number}`
 
-**Quality Gate:**
-- None (best-effort closure)
+**Quality Gate:** None (best-effort closure)
 
 ---
 
-## Phase 8: Wave Completion Report
+### Phase 8: Wave Completion Report
 
-**Actions:**
-Generate ASCII report:
+**Goal:** Summarize the wave and prepare for next.
 
+**Output:**
 ```
 ┌─────────────────────────────────────────────────┐
 │ Wave {N} Complete - {X} Issues                  │
 ├─────────────────────────────────────────────────┤
-│ Issues Closed: #250, #253, #255                 │
-│ Contracts: 3 generated, 3 audited               │
+│ Issues Closed: #50, #53                         │
+│ Contracts: 2 generated, 2 audited               │
 │ Migrations: 1 applied                           │
-│ Tests: 5 Playwright tests created               │
+│ Tests: 3 Playwright tests created               │
 │ Build: PASS ✅                                  │
 │ Contract Tests: PASS ✅                         │
-│ E2E Tests: PASS ✅ (23/23)                      │
-│ Journey Coverage: 87%                           │
+│ E2E Tests: PASS ✅ (12/12)                      │
+│ Journey Coverage: 85%                           │
 ├─────────────────────────────────────────────────┤
 │ Commits:                                        │
-│ - a1b2c3d feat(cover): Cover pool UI (#250)    │
-│ - e4f5g6h feat(reports): Audit report (#253)   │
-│ - i7j8k9l feat(export): Payroll CSV (#255)     │
+│ - a1b2c3d feat(profile): User profile (#50)    │
+│ - e4f5g6h feat(admin): Admin dashboard (#53)   │
 ├─────────────────────────────────────────────────┤
-│ Next: Wave {N+1} - 2 issues ready               │
+│ Next: Wave 2 - 2 issues ready                   │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -334,6 +313,9 @@ Generate ASCII report:
 ### Contract Conflict
 ```
 STOP: Contract conflict detected
+
+New contract: docs/contracts/feature_profile.yml
+Rule: PROF-003 conflicts with ARCH-012
 
 Fix required before continuing Wave {N}.
 Phase 2 will be re-run after fix.
@@ -353,9 +335,9 @@ Fix required. Phase 4 will resume after fix.
 ```
 STOP: E2E test failed
 
-Test: tests/e2e/cover_staff.spec.ts
-Scenario: Dispatch cover staff
-Error: Element [data-testid='dispatch-btn'] not found
+Test: tests/e2e/profile.spec.ts
+Scenario: View user profile
+Error: Element [data-testid='profile-avatar'] not found
 Screenshot: [path]
 
 Fix required. Phase 4 will resume after fix.
@@ -374,32 +356,12 @@ Wave execution is **COMPLETE** when:
 
 ---
 
-## Output Artifacts
-
-After execution, verify:
-```
-docs/contracts/
-  ├── feature_*.yml
-  ├── journey_*.yml
-
-tests/e2e/
-  ├── *.spec.ts
-
-src/__tests__/contracts/
-  ├── *.test.ts
-
-supabase/migrations/
-  ├── {NNN}_*.sql (if DB changes)
-```
-
----
-
 ## Agent Coordination
 
 **Subagents spawned (by phase):**
 - Phase 2: specflow-writer (parallel, one per issue)
 - Phase 3: contract-validator (parallel, one per contract)
-- Phase 4: migration-builder, edge-function-builder (as needed)
+- Phase 4: migration-builder, edge-function-builder, frontend-builder (as needed)
 - Phase 5: playwright-from-specflow, journey-tester (parallel)
 - Phase 6: test-runner, journey-enforcer (sequential then parallel)
 - Phase 7: ticket-closer (parallel, one per issue)
@@ -416,14 +378,179 @@ Wait for all to complete, then proceed to next phase.
 
 ---
 
+## Quality Gates
+
+- [ ] Protocol file read (if exists)
+- [ ] All agent prompts loaded
+- [ ] Dependency graph calculated correctly
+- [ ] No circular dependencies
+- [ ] Contracts generated before implementation
+- [ ] Tests generated before execution
+- [ ] Quality gates respected (STOP on failure)
+- [ ] Progress reported at each phase
+- [ ] Issues closed with full documentation
+
+---
+
 ## Notes
 
-- **Read WAVE_EXECUTION_PROTOCOL.md at start** for full details
 - **Spawn agents in parallel** where protocol allows
 - **Stop at quality gates** - do not proceed if tests fail
-- **Report progress** at each phase
+- **Report progress** at each phase with ASCII formatting
 - **Handle user overrides** in Phase 1 priority analysis
 - **Commit messages must reference issue numbers**
 - **Tests must map to contract rules**
 
-**This agent orchestrates the entire wave execution. User just invokes it once.**
+**This agent orchestrates the entire wave execution. User invokes it once.**
+
+---
+
+## Process (AGENT TEAMS MODE)
+
+### Detection
+If `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` is set, use agent teams mode.
+Otherwise, fall back to subagent mode (existing behavior above).
+
+### Phase 1: Discovery (unchanged)
+Fetch issues, build dependency graph, calculate waves, score priorities,
+output ASCII report, prompt for approval.
+
+### Phase 2: Spawn Team via TeammateTool
+
+Load agent prompts and team naming system:
+
+```bash
+# Load prompts
+Read scripts/agents/issue-lifecycle.md
+Read scripts/agents/db-coordinator.md
+Read scripts/agents/quality-gate.md
+Read scripts/agents/journey-gate.md
+Read scripts/agents/PROTOCOL.md
+Read scripts/agents/team-names.md
+```
+
+#### Name Assignment
+
+1. Pick a **team name** based on wave character (see `team-names.md`):
+   - Fianna (general), Tuatha (architecture), Red Branch (bug fixes), Brigid's Forge (features), Tir na nOg (migrations)
+2. Pick an **issue-lifecycle name pool** based on wave type:
+   - Writers (contract-heavy), Builders (implementation), Warriors (bug fixes), Explorers (infrastructure)
+3. Assign names round-robin from the pool. Singletons always use fixed names:
+   - db-coordinator → Hamilton, quality-gate → Keane, journey-gate → Scathach
+
+Spawn the team:
+```
+TeammateTool(operation: "spawnTeam", name: "Fianna", config: {
+  agents: [
+    { name: "Yeats",    prompt: "<issue-lifecycle prompt>\n\nISSUE_NUMBER=50 WAVE_NUMBER=<N>" },
+    { name: "Swift",    prompt: "<issue-lifecycle prompt>\n\nISSUE_NUMBER=51 WAVE_NUMBER=<N>" },
+    { name: "Beckett",  prompt: "<issue-lifecycle prompt>\n\nISSUE_NUMBER=52 WAVE_NUMBER=<N>" },
+    { name: "Hamilton", prompt: "<db-coordinator prompt>\n\nWAVE_NUMBER=<N>" },
+    { name: "Keane",    prompt: "<quality-gate prompt>\n\nWAVE_NUMBER=<N>" }
+  ]
+})
+```
+
+Create shared tasks for each issue:
+```
+TaskCreate(subject: "Implement #50", description: "Full lifecycle", activeForm: "Implementing #50")
+TaskCreate(subject: "Implement #51", description: "Full lifecycle", activeForm: "Implementing #51")
+TaskCreate(subject: "Implement #52", description: "Full lifecycle", activeForm: "Implementing #52")
+```
+
+Set dependencies between tasks using `addBlockedBy` where issues depend on each other.
+
+### Phases 3-7: REPLACED by teammate self-coordination
+
+Teammates work independently. The leader monitors incoming `write` messages:
+- `BLOCKED #N <reason>`: Assess situation, reassign or defer
+- `READY_FOR_CLOSURE #N <cert>`: Record, check if all teammates ready
+
+All inter-agent communication uses TeammateTool `write` (direct) and
+`broadcast` (notifications). See `agents/PROTOCOL.md` for full message catalog.
+
+### Phase 6b: Wave Gate (after ALL teammates report READY_FOR_CLOSURE)
+1. Collect all J-* IDs across the wave (from teammate certificates).
+2. Send to quality-gate:
+   ```
+   TeammateTool(write, to: "qa-gate", message: "RUN_JOURNEY_TIER2 issues:[50, 51, 52]")
+   ```
+3. If FAIL:
+   - Identify interaction bug from quality-gate report.
+   - Notify affected teammates via `write` to fix.
+   - Re-run Tier 2 after fixes.
+4. If PASS: proceed.
+
+### Phase 6c: Regression Gate
+1. Send to quality-gate:
+   ```
+   TeammateTool(write, to: "qa-gate", message: "RUN_REGRESSION wave:<N>")
+   ```
+2. If new failures: STOP, identify regression, notify affected teammates via `write`.
+3. If PASS: update baseline, proceed.
+
+### Phase 7: Issue Closure
+Close all issues that have:
+- `READY_FOR_CLOSURE` from their issue-lifecycle teammate
+- Wave gate (Tier 2) pass
+- Regression gate (Tier 3) pass
+
+### Phase 7b: Graceful Shutdown
+```
+TeammateTool(operation: "requestShutdown")
+```
+Wait for all teammates to finish current work before proceeding.
+
+### Phase 8: Wave Report (with named completion)
+
+Generate an ASCII summary that references each agent's mythic name and maps their
+"powers" to what they actually accomplished. See `team-names.md` for the flavor mapping.
+
+```
+═══════════════════════════════════════════════════════════════
+WAVE <N> COMPLETE — Team <team_name>
+═══════════════════════════════════════════════════════════════
+
+<Name> (#<issue>) — <what they did>, with <mythic power flavor>
+<Name> (#<issue>) — <what they did>, with <mythic power flavor>
+<Name> (#<issue>) — <what they did>, with <mythic power flavor>
+
+<Singleton> held <resource> steady.
+<Singleton> let nothing past the gate.
+Finn McCool orchestrated from above.
+
+<N> issues closed. <N> regressions. All tiers <status>.
+═══════════════════════════════════════════════════════════════
+```
+
+Example:
+```
+═══════════════════════════════════════════════════════════════
+WAVE 3 COMPLETE — Team Fianna
+═══════════════════════════════════════════════════════════════
+
+Yeats (#325)  — crafted WhatsApp notification contracts with symbolic precision
+Swift (#326)  — enforced no-show alert rules with razor rhetoric
+Pearse (#327) — built the coverage request system with theatrical intensity
+
+Hamilton held the schema steady across 3 migrations.
+Keane let nothing past the gate — 47 tests, 0 failures.
+Finn McCool orchestrated the wave from above.
+
+3 issues closed. 0 regressions. All tiers green.
+═══════════════════════════════════════════════════════════════
+```
+
+Then prompt for next wave or EXIT.
+
+---
+
+## Communication Protocol (Agent Teams Mode)
+
+All inter-agent communication uses Claude Code's **TeammateTool** API:
+- **`write`** — direct message to a named teammate
+- **`broadcast`** — notify all teammates (use sparingly)
+- **Shared TaskList** — issue tracking with dependency management
+
+See `agents/PROTOCOL.md` for the full message catalog, agent roles,
+environment variables, and fallback behavior.
