@@ -36,6 +36,8 @@ The fastest way to use Specflow is to let **agents do the work**:
 
 **This guide focuses on the agent-first workflow.** Manual setup is covered in [Advanced](/advanced/).
 
+> **Agent Teams mode (Claude Code 4.6+):** For complex multi-issue waves, enable persistent peer-to-peer teammates with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true`. See [Agent Teams](/agent-system/agent-teams/) for details.
+
 ---
 
 ## Prerequisites
