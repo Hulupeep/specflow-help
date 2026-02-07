@@ -190,6 +190,48 @@ Remaining: 7 issues (future waves)
 
 ---
 
+## Phase 2b: Contract Completeness Gate (MANDATORY)
+
+**Goal:** Verify that Phase 2 actually produced ALL required artifacts — not just tickets.
+
+```bash
+node scripts/check-contract-completeness.mjs
+```
+
+This script cross-references `CONTRACT_INDEX.yml` against actual files on disk. If it finds gaps, it tells you exactly what to fix:
+
+```
+✗ Found 3 completeness issue(s):
+
+  1. [ORPHAN_FILE] Journey file exists but is NOT in CONTRACT_INDEX: journey_user_login.yml
+
+     HOW TO FIX:
+     Add this entry to docs/contracts/CONTRACT_INDEX.yml under the contracts: section:
+
+       - id: J-USER-LOGIN
+         file: journey_user_login.yml
+         status: active
+         ...
+
+  2. [MISSING_FILE] CONTRACT_INDEX lists J-SIGNUP → journey_signup.yml but file doesn't exist
+
+     HOW TO FIX:
+     Create the file: docs/contracts/journey_signup.yml
+     Template: Copy an existing journey_*.yml and update journey_meta
+
+  3. [COUNT_MISMATCH] metadata.total_journeys = 12 but found 14 journey entries
+
+     HOW TO FIX:
+     Open docs/contracts/CONTRACT_INDEX.yml
+     Change: total_journeys: 14
+```
+
+**Quality Gate:** Exit code 0 = proceed. Exit code 1 = STOP, fix gaps, re-run.
+
+Do NOT proceed to Phase 3 until this gate passes.
+
+---
+
 ## Phase 3: Agent Spawning
 
 **Goal:** Launch specialized agents for Wave 1 issues.

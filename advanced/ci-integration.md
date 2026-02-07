@@ -36,6 +36,54 @@ contracts → unit-tests → build → e2e-tests → journey-tests
 
 ---
 
+## Contract Completeness Gate (NEW)
+
+Before running contract pattern tests, a **completeness check** verifies that `CONTRACT_INDEX.yml` is in sync with actual files on disk. This prevents the gap where tickets get created but contract artifacts don't.
+
+```yaml
+# .github/workflows/specflow-ci.yml
+contract-completeness:
+  name: Contract Completeness
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with: { node-version: '20', cache: 'pnpm' }
+    - uses: pnpm/action-setup@v4
+      with: { version: 9 }
+    - run: pnpm install --frozen-lockfile
+    - name: Check contract completeness
+      run: node scripts/check-contract-completeness.mjs
+```
+
+**What it checks:**
+1. Every `journey_*.yml` on disk has a CONTRACT_INDEX entry
+2. Every CONTRACT_INDEX journey entry has a `.yml` file on disk
+3. Every `feature_*.yml` on disk has a CONTRACT_INDEX entry
+4. Metadata counts (total_contracts, total_journeys) match reality
+5. Feature contract `journeys:` lists reference real journey entries
+
+**When it fails**, the output tells you exactly what to fix:
+
+```
+✗ Found 2 completeness issue(s):
+
+  1. [ORPHAN_FILE] Journey file exists but is NOT in CONTRACT_INDEX: journey_user_login.yml
+
+     HOW TO FIX:
+     Add this entry to docs/contracts/CONTRACT_INDEX.yml ...
+
+  2. [COUNT_MISMATCH] metadata.total_journeys = 12 but found 14
+
+     HOW TO FIX:
+     Open docs/contracts/CONTRACT_INDEX.yml
+     Change: total_journeys: 14
+```
+
+There is also a Jest test (`contract_completeness.test.ts`) that performs the same checks locally via `pnpm test -- contracts`.
+
+---
+
 ## The Key: `needs: contract-tests`
 
 This single line creates the fail-fast behavior:

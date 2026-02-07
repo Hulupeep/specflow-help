@@ -248,8 +248,10 @@ Separate from Gherkin. These are the **checkbox DoD items** for the implementer:
 - [ ] Unique constraint: no duplicate zone names within same space
 ```
 
-### Step 8: Define Journeys (Epic mode only)
-Multi-step flows that cross feature boundaries:
+### Step 8: Define Journeys (Required for all UI features)
+Multi-step flows that cross feature boundaries. **Journeys are Definition of Done** for any
+feature with user-facing UI — not just epics. For standalone tickets (Mode C) with UI, include
+at least one journey showing how the user discovers and uses the feature end-to-end.
 
 ```markdown
 ## Journey: Admin Sets Up New Site
@@ -264,6 +266,42 @@ Multi-step flows that cross feature boundaries:
 ### Step 9: Create GitHub Issues
 
 Use `gh issue create` with proper formatting. Always use heredoc for body.
+
+### Step 10: Generate Contract Artifacts (MANDATORY)
+
+**After creating GitHub issues, you MUST also create these artifacts. Tickets without contracts are incomplete.**
+
+For EVERY ticket that has a UI journey or user-facing acceptance criteria:
+
+1. **Journey Contract YAML** — `docs/contracts/journey_{snake_case_name}.yml`
+   - Must include: `journey_meta` (id, type, dod_criticality, issue), `steps`, `test_hooks.e2e_test_file`, `acceptance_criteria`
+
+2. **Feature Contract YAML** (if new feature area) — `docs/contracts/feature_{name}.yml`
+   - Non-negotiable rules with `required_patterns` and `forbidden_patterns`
+
+3. **CONTRACT_INDEX.yml update** — Add entries for new contracts, journeys, requirements coverage, test files
+
+4. **Contract test stub** (if new feature area) — `src/__tests__/contracts/{name}_contract.test.ts`
+
+**Self-Check Before Finishing:**
+```
+[ ] Every ticket with UI has a journey_*.yml in docs/contracts/
+[ ] Every new feature area has a feature_*.yml in docs/contracts/
+[ ] CONTRACT_INDEX.yml version incremented and counts updated
+[ ] Every journey YAML listed in CONTRACT_INDEX
+[ ] GitHub issues commented with journey ID + contract file path
+```
+
+**What Happens If You Skip This:**
+
+The `contract_completeness.test.ts` audit test will fail with messages like:
+```
+FAIL: Journey file missing for CONTRACT_INDEX entry J-DEFAULT-PROGRAM
+  → Create: docs/contracts/journey_default_program.yml
+  → Template: Copy an existing journey_*.yml and update journey_meta
+```
+
+The CI pipeline will also block the PR at the "Contract Completeness" gate.
 
 ---
 
