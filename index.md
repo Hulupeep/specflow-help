@@ -94,12 +94,32 @@ Specflow isn't just a framework. It's a **methodology** powered by 23+ specializ
 
 ## What You Get
 
+### Core Framework
 - **Feature Contracts**: Architectural rules that must hold (invariants)
 - **Journey Contracts**: End-to-end workflows that define "done"
 - **Automated Testing**: Playwright E2E tests enforce contracts
 - **Journey Verification Hooks**: Automatic E2E execution at build boundaries
-- **Agent Orchestration**: DPAO methodology (Discovery → Parallel → Analysis → Orchestration)
-- **Agent Teams**: Persistent peer-to-peer teammates with three-tier journey gates (Claude Code 4.6+)
+
+### Quality Gates (Out of the Box)
+- **[Security Gates](/core-concepts/security-accessibility/)**: OWASP Top 10 coverage — hardcoded secrets, SQL injection, XSS, eval, path traversal (SEC-001..005)
+- **[Accessibility Gates](/core-concepts/security-accessibility/)**: WCAG AA basics — alt text, aria-labels, form labels, focus order (A11Y-001..004)
+- **[Production Readiness](/core-concepts/production-readiness/)**: No demo data, placeholder domains, or hardcoded IDs in production (PROD-001..003)
+- **[Test Integrity](/core-concepts/security-accessibility/)**: No mocking in E2E tests, no placeholder assertions, no swallowed errors (TEST-001..005)
+
+### Self-Healing & Learning
+- **[Self-Healing Fix Loops](/advanced/self-healing/)**: Autonomous violation repair with confidence-tiered fix patterns (Platinum → Bronze)
+- **[Post-Mortem Learning](/advanced/learning-system/)**: Violations get recorded, fixes get stored, agents get warned before repeating mistakes
+- **[CI Feedback Loop](/advanced/ci-feedback/)**: Automatic CI status reporting after every git push
+
+### Agent System
+- **[23+ Specialized Agents](/agent-system/)**: Complete delivery pipeline from spec to ship
+- **[Model Routing](/agent-system/model-routing/)**: Haiku/Sonnet/Opus routing per agent — 40-60% cost savings
+- **[Agent Teams](/agent-system/agent-teams/)**: Persistent peer-to-peer teammates with three-tier journey gates (Claude Code 4.6+)
+- **DPAO Orchestration**: Discovery → Parallel → Analysis → Orchestration
+
+### Portable Adoption
+- **SKILL.md**: Single-file portable skill — drop one file into any project for instant Specflow
+- **Full Agent Library**: 23+ agents for graduated adoption
 - **Academic Foundation**: 40+ years of CS research (DbC, Property Testing, MDE)
 
 ---
@@ -132,25 +152,36 @@ Hooks trigger at build boundaries:
 
 ## Quick Start
 
+### Option A: Single File (Fastest)
+
+```bash
+cp Specflow/SKILL.md your-project/
+```
+
+Then tell Claude Code: `/specflow` — the skill activates the core methodology with security, accessibility, and production readiness gates included.
+
+### Option B: Full Agent Library
+
 ```bash
 # 1. Add Specflow to your project
 git clone https://github.com/Hulupeep/Specflow.git
-cp -r Specflow/scripts/agents your-project/scripts/
+cp -r Specflow/agents/ your-project/scripts/agents/
 
-# 2. Create GitHub issues with acceptance criteria (Gherkin)
-# See: https://github.com/your-org/your-project/issues/new
+# 2. Copy default contract templates
+cp Specflow/templates/contracts/*.yml your-project/docs/contracts/
 
-# 3. Use Claude Code to invoke waves-controller agent
-# Read scripts/agents/waves-controller.md
-# Task("Execute waves", "{prompt content}", "general-purpose")
+# 3. Install hooks
+bash Specflow/install-hooks.sh your-project/
 
-# 4. Agents autonomously:
-# - Generate contracts from issues (specflow-writer)
-# - Build database migrations (migration-builder)
-# - Create E2E tests (playwright-from-specflow)
-# - Verify contracts pass (test-runner)
+# 4. Tell Claude Code
+# "Execute waves"
+```
 
-# 5. Ship when contracts pass ✅
+### Option C: One Prompt (Zero Setup)
+
+```
+Read Specflow/README.md and set up my project with Specflow agents
+including updating my CLAUDE.md. Then execute my backlog in waves.
 ```
 
 [Full Getting Started Guide →](/getting-started/)
