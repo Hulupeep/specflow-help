@@ -39,13 +39,19 @@ Once Specflow is installed, **you do not need to tell Claude to use it.** These 
 
 ## Quick Verification Test
 
-After installation, start a **new** Claude Code session in your project directory and ask:
+After installation, start a **new** Claude Code session in your project directory and run these two verification prompts.
+
+---
+
+### Test 1: Contract Awareness
+
+Ask Claude:
 
 ```
 What contracts are active in this project?
 ```
 
-### Expected Response (Specflow is working)
+**Expected Response (Specflow is working):**
 
 Claude should list contracts from `docs/contracts/` with their IDs and rules:
 
@@ -64,7 +70,7 @@ Journey contracts:
 Total: 5 contracts, 18 invariants enforced.
 ```
 
-### Unexpected Response (Specflow is NOT working)
+**Unexpected Response (Specflow is NOT working):**
 
 If Claude says any of these, the setup is incomplete:
 
@@ -73,6 +79,55 @@ If Claude says any of these, the setup is incomplete:
 - "I'm not familiar with Specflow."
 
 **This means** `CLAUDE.md` is not being read, or contracts are not installed in `docs/contracts/`.
+
+---
+
+### Test 2: Journey Contracts and Hooks
+
+Ask Claude:
+
+```
+Are journey contracts being executed? Are hooks running for specflow?
+```
+
+**Expected Response (Hooks and journeys are working):**
+
+Claude should check for the hook infrastructure and journey test files:
+
+```
+Checking journey contract execution setup...
+
+Hooks:
+  - .claude/hooks/post-build.sh: Installed (runs journey tests after successful builds)
+  - .claude/hooks/post-commit.sh: Installed (runs journey tests after commits)
+  - Hook enforcement: Active (will block on test failures)
+
+Journey contracts:
+  - docs/contracts/journey_user_signup.yml: Maps to tests/e2e/journey_user_signup.spec.ts
+  - docs/contracts/journey_checkout.yml: Maps to tests/e2e/journey_checkout.spec.ts
+
+Test execution:
+  - Hooks extract issue numbers from recent commits (e.g., #123)
+  - Each issue is checked for journey contract ID (e.g., J-USER-SIGNUP)
+  - Playwright runs only the relevant journey tests
+  - Build/commit blocked if tests fail
+
+Status: Journey enforcement is active.
+```
+
+**Unexpected Response (Hooks/journeys NOT working):**
+
+If Claude says any of these, the hook setup is incomplete:
+
+- "I'm not sure what journey contracts are."
+- "I don't see any hooks installed."
+- "Where should I look for journey tests?"
+
+**This means:**
+- Hooks were not installed via `install-hooks.sh`
+- Journey contracts are missing from `docs/contracts/`
+- Journey test files are missing from `tests/e2e/`
+- CLAUDE.md does not include the Journey Verification Hooks section
 
 ---
 
