@@ -2,7 +2,7 @@
 layout: default
 title: Understanding Output
 parent: Getting Started
-nav_order: 4
+nav_order: 5
 permalink: /getting-started/understanding-output/
 ---
 

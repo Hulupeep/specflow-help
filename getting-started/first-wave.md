@@ -2,7 +2,7 @@
 layout: default
 title: Your First Wave
 parent: Getting Started
-nav_order: 3
+nav_order: 4
 permalink: /getting-started/first-wave/
 ---
 
