@@ -28,13 +28,11 @@ Specflow has three core concepts:
 
 ---
 
-## Coming Soon
+## Pages
 
-Full content for this section is under development. Check back soon for:
-
-- What Are Contracts?
-- What Are Agents?
-- What Are Journeys?
-- How Everything Fits Together
+- **[What Are Contracts?](/core-concepts/contracts/)** — Architectural invariants enforced like types
+- **[How Agents Work](/core-concepts/agents/)** — 23+ specialized LLM-powered workers
+- **[What Are Journeys?](/core-concepts/journeys/)** — End-to-end workflows that define "done"
+- **[Security & Accessibility Gates](/core-concepts/security-accessibility/)** — Default SEC and A11Y contract rules
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)

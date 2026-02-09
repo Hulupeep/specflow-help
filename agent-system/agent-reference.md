@@ -614,7 +614,53 @@ Read scripts/agents/specflow-uplifter.md, then add Specflow to this legacy proje
 
 ---
 
-## 6. Agent Teams Agents
+## 6. Self-Healing Agent
+
+### heal-loop
+
+**Role:** Autonomous fix loop for contract violations
+
+**When to use:**
+- Contract tests have failed and violations need repair
+- Spawned automatically by waves-controller (Phase 6a) when violations are detected
+- Not typically invoked manually
+
+**Inputs:**
+- Test failure output (violation messages with rule ID, file, line)
+- Contract YAML files (for `auto_fix` hints and rule context)
+- Fix pattern store (`.specflow/fix-patterns.json`)
+
+**Outputs:**
+- Minimal code fixes applied to violating files
+- Updated fix pattern store (confidence scores adjusted)
+- Escalation report (for violations that could not be auto-fixed)
+
+**Example (automatic invocation):**
+```
+waves-controller Phase 6a:
+  → 3 violations detected (SEC-001, SEC-003, A11Y-002)
+  → heal-loop spawned
+  → SEC-001: Fixed (replaced hardcoded key with env var)
+  → SEC-003: Fixed (innerHTML → textContent)
+  → A11Y-002: Fixed (added aria-label to icon button)
+  → All contract tests re-run: PASS
+```
+
+**Model tier:** Opus (requires deep reasoning about code semantics and fix side effects)
+
+**Quality gates:**
+- Fix must resolve the specific violation without introducing new violations
+- Fix must be minimal (smallest change that satisfies the contract)
+- Confidence score must meet threshold for auto-apply (Silver tier or above)
+- Maximum 3 iterations before escalation
+
+**Configuration:** `.specflow/config.json` (see [Self-Healing Fix Loops](/advanced/self-healing/))
+
+**[Full Documentation -->](/advanced/self-healing/)**
+
+---
+
+## 7. Agent Teams Agents
 
 These agents are available when `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` is set. They enable persistent peer-to-peer coordination instead of hub-and-spoke subagent dispatching.
 
@@ -902,6 +948,7 @@ Now specflow-writer also generates contract tests (previously separate agent).
 | **board-auditor** | Workflow | Weekly health check | 30-45 min |
 | **sprint-executor** | Workflow | Sprint start | 2-4x |
 | **specflow-uplifter** | Workflow | Mid-project adoption | 2-3 hours |
+| **heal-loop** | Self-Healing | Contract violations detected | 30-60 min |
 | **issue-lifecycle** | Agent Teams | Per-issue full lifecycle | 4-6 hours |
 | **db-coordinator** | Agent Teams | Migration conflict prevention | 30-60 min |
 | **quality-gate** | Agent Teams | Three-tier test execution | 15-30 min |

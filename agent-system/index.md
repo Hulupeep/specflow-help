@@ -31,6 +31,7 @@ Specflow uses an **agent-first approach** powered by the **DPAO methodology** (D
 - **[Agent Reference](/agent-system/agent-reference/)** — All 23+ agents and when to use them
 - **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination (new)
 - **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
+- **[Model Routing](/agent-system/model-routing/)** — Route agents to the right model tier for cost efficiency
 - **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts for your workflow
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)

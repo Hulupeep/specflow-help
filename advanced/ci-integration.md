@@ -2,7 +2,7 @@
 layout: default
 title: CI/CD Integration
 parent: Advanced
-nav_order: 5
+nav_order: 6
 ---
 
 # CI/CD Integration

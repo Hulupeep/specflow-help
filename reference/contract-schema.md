@@ -1,3 +1,11 @@
+---
+layout: default
+title: Contract Schema
+parent: Reference
+nav_order: 1
+permalink: /reference/contract-schema/
+---
+
 # Contract Schema
 
 All contracts live in `docs/contracts/` and follow this schema.
@@ -924,6 +932,94 @@ This document adds 3 critical extensions that reduce agent failure rates from 11
 3. **Parallel Coordination Rules** - Prevents premature exports/imports during parallel work
 
 These extensions are proven to save 3-4 hours per 9-issue wave by catching common failures early.
+
+---
+
+## 14. Auto-Fix Configuration
+
+Rules can include `auto_fix` metadata to guide the [heal-loop agent](/advanced/self-healing/) in automatically repairing violations.
+
+### auto_fix Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `strategy` | string | Yes | Fix approach: `replace`, `insert`, `wrap`, `remove` |
+| `hint` | string | Yes | Human-readable instruction for the fixing agent |
+| `wrap_pattern` | string | No | Template for the replacement (supports `${UPPER_SNAKE_CASE_NAME}` placeholders) |
+
+### Example
+
+```yaml
+forbidden_patterns:
+  - pattern: /(password|api_key|secret)\s*[:=]\s*['"][^'"]+['"]/i
+    message: "Hardcoded secret detected"
+    auto_fix:
+      strategy: "replace"
+      hint: "Replace hardcoded value with process.env.VARIABLE_NAME"
+      wrap_pattern: "process.env.${UPPER_SNAKE_CASE_NAME}"
+```
+
+### Fix Strategy Reference
+
+| Strategy | When to Use | Example |
+|----------|-------------|---------|
+| `replace` | Swap matched text with a safe alternative | `eval()` -> `JSON.parse()` |
+| `insert` | Add missing required pattern | Insert `authMiddleware` into route |
+| `wrap` | Wrap matched text with a function | `value` -> `sanitize(value)` |
+| `remove` | Delete the matched code entirely | Remove `console.log` statements |
+
+---
+
+## 15. SEC-xxx and A11Y-xxx Rule Prefixes
+
+Specflow ships default contract templates for security and accessibility. These use reserved rule ID prefixes:
+
+| Prefix | Domain | Default Rules |
+|--------|--------|---------------|
+| `SEC` | Security | SEC-001 through SEC-005 |
+| `A11Y` | Accessibility | A11Y-001 through A11Y-004 |
+
+These defaults are defined in template files:
+- `Specflow/templates/contracts/security_defaults.yml`
+- `Specflow/templates/contracts/accessibility_defaults.yml`
+
+See [Security & Accessibility Gates](/core-concepts/security-accessibility/) for the full rule definitions.
+
+**Numbering convention:** Project-specific security rules should start at SEC-006 or higher. Project-specific accessibility rules should start at A11Y-005 or higher.
+
+---
+
+## 16. Fix Pattern Store Schema
+
+The heal-loop agent stores learned fix patterns in `.specflow/fix-patterns.json`. Each pattern tracks its success rate and is assigned a confidence tier.
+
+### Pattern Entry Schema
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique pattern identifier (e.g., `fix-sec-003-innerhtml`) |
+| `rule_id` | string | Contract rule this pattern fixes (e.g., `SEC-003`) |
+| `description` | string | Human-readable description of the fix |
+| `match` | string | Regex that triggers this fix pattern |
+| `replacement_template` | string | Template for the replacement text |
+| `confidence` | number | Score from 0.00 to 1.00 |
+| `tier` | string | `platinum` (0.90+), `gold` (0.70-0.89), `silver` (0.40-0.69), `bronze` (0.00-0.39) |
+| `applied_count` | number | Total applications |
+| `success_count` | number | Successful fixes |
+| `failure_count` | number | Failed fixes |
+| `last_used` | string | ISO date |
+| `created` | string | ISO date |
+
+### Score Evolution
+
+| Event | Score Change |
+|-------|-------------|
+| Successful fix | +0.05 |
+| Failed fix | -0.10 |
+| 90 days unused | -0.01 (decay) |
+| New pattern | Starts at 0.50 (Silver) |
+
+See [Self-Healing Fix Loops](/advanced/self-healing/) for the full heal-loop documentation.
 
 ---
 
