@@ -23,6 +23,8 @@ This section covers advanced workflows for power users:
 - **[Manual Contract Creation](/advanced/manual-contracts/)** — Writing YAML contracts by hand
 - **[Journey Testing](/advanced/journey-testing/)** — End-to-end user journey tests
 - **[Self-Healing Fix Loops](/advanced/self-healing/)** — Autonomous violation repair with confidence-tiered patterns
+- **[Post-Mortem Learning System](/advanced/learning-system/)** — Violations get recorded, fixes get stored, agents get warned
+- **[CI Feedback Loop](/advanced/ci-feedback/)** — Automatic CI status reporting after every git push
 
 **Note:** Most users should start with the [agent-first workflow](/getting-started/). Manual setup is 3-4x slower but gives more control.
 
@@ -54,6 +56,8 @@ See [Journey Verification Hooks](/advanced/journey-verification-hooks/) for setu
 | [Manual Contract Creation](/advanced/manual-contracts/) | Write YAML contracts by hand when needed |
 | [Journey Testing](/advanced/journey-testing/) | Create end-to-end user journey tests with Playwright |
 | [Self-Healing Fix Loops](/advanced/self-healing/) | Autonomous violation repair with confidence-tiered fix patterns |
+| [Post-Mortem Learning System](/advanced/learning-system/) | How violations and fixes become agent warnings |
+| [CI Feedback Loop](/advanced/ci-feedback/) | Automatic CI status polling after git push |
 
 ---
 

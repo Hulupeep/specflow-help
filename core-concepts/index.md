@@ -34,5 +34,6 @@ Specflow has three core concepts:
 - **[How Agents Work](/core-concepts/agents/)** — 23+ specialized LLM-powered workers
 - **[What Are Journeys?](/core-concepts/journeys/)** — End-to-end workflows that define "done"
 - **[Security & Accessibility Gates](/core-concepts/security-accessibility/)** — Default SEC and A11Y contract rules
+- **[Production Readiness Gates](/core-concepts/production-readiness/)** — Default PROD rules for demo data, placeholder domains, and hardcoded IDs
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)
