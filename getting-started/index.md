@@ -22,16 +22,30 @@ Get up and running with Specflow in under 5 minutes.
 
 ---
 
+## Choose Your Path
+
+**Fastest option:** Drop a single file into your project and start enforcing contracts immediately.
+
+```bash
+cp Specflow/SKILL.md your-project/
+```
+
+Then tell Claude Code: `/specflow` -- the skill activates the core methodology with security, accessibility, production readiness, and test integrity gates (adapted from [forge](https://github.com/ikennaokpala/forge) by Ikenna N. Okpala) included out of the box.
+
+**[SKILL.md documentation](/getting-started/skill-file/)** -- what it includes, what it does not, and when to graduate to the full agent library.
+
+---
+
 ## The Agent-First Approach
 
 **SpecFlow isn't testing. It's containment.**
 
-The fastest way to use Specflow is to let **agents do the work**:
+When your project outgrows SKILL.md, the full agent library lets **agents do the work**:
 
 1. You define what matters (GitHub issues, requirements)
 2. `waves-controller` orchestrates 23+ specialized agents
 3. Agents generate contracts, migrations, tests, implementation
-4. Tests enforce architectural boundaries automatically
+4. Tests enforce architectural boundaries automatically -- including forge-adapted quality gates for security, accessibility, and production readiness
 5. You ship (or stop if contracts fail)
 
 **This guide focuses on the agent-first workflow.** Manual setup is covered in [Advanced](/advanced/).
@@ -162,12 +176,13 @@ If the test fails, the build fails. **No manual review needed.**
 
 ## Next Steps
 
-- **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on your own project
-- **[Install Hooks](/advanced/journey-verification-hooks/)** — Auto-run E2E tests at build boundaries
-- **[Understand Contracts](/core-concepts/contracts/)** — Learn what contracts enforce
-- **[Explore Agents](/agent-system/)** — Dive into the 23+ agent types
-- **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination (Claude Code 4.6+)
-- **[Read the Background](/background/)** — Understand the academic foundation
+- **[SKILL.md (Single File)](/getting-started/skill-file/)** -- Fastest path: drop one file, get instant contract enforcement
+- **[Run Your First Wave](/getting-started/first-wave/)** -- Execute waves-controller on your own project
+- **[Install Hooks](/advanced/journey-verification-hooks/)** -- Auto-run E2E tests at build boundaries
+- **[Understand Contracts](/core-concepts/contracts/)** -- Learn what contracts enforce
+- **[Explore Agents](/agent-system/)** -- Dive into the 23+ agent types
+- **[Agent Teams](/agent-system/agent-teams/)** -- Persistent teammate coordination (Claude Code 4.6+)
+- **[Read the Background](/background/)** -- Understand the academic foundation
 
 ---
 

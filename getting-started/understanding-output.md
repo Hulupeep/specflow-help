@@ -2,7 +2,7 @@
 layout: default
 title: Understanding Output
 parent: Getting Started
-nav_order: 3
+nav_order: 4
 permalink: /getting-started/understanding-output/
 ---
 
@@ -534,30 +534,14 @@ Build failed. Fix journey to continue.
 
 ---
 
-## Compiler Analogy Recap
-
-| TypeScript | Specflow |
-|------------|----------|
-| Type definitions (`.d.ts`) | Contracts (`.yml`) |
-| Type checker (`tsc`) | Contract tests (`vitest`) |
-| Runtime assertions | E2E tests (`playwright`) |
-| `Type 'string' is not assignable to 'number'` | `CONTRACT VIOLATION: AUTH-001` |
-| Build blocked until fixed | Build blocked until fixed |
-
-**Same enforcement model. Different domain.**
-
----
-
 ## Next Steps
 
 Now that you understand output:
 
-1. **[Explore Core Concepts](/core-concepts/)** — Dive deeper into contracts, agents, journeys
-2. **[Browse Agent System](/agent-system/)** — Learn about the 23+ agent types
-3. **[Read Background](/background/)** — Understand the academic foundation
+1. **[Explore Core Concepts](/core-concepts/)** -- Dive deeper into contracts, agents, journeys
+2. **[Browse Agent System](/agent-system/)** -- Learn about the 23+ agent types
+3. **[Read Background](/background/)** -- Understand the academic foundation
 
 ---
 
-**The compiler doesn't trust your types. Specflow doesn't trust your architecture.**
-
-Both are right not to.
+[View on GitHub](https://github.com/Hulupeep/Specflow)

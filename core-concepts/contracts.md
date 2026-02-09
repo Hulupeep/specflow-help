@@ -490,16 +490,8 @@ Update the contract test to match.
 
 - **[How Agents Work](/core-concepts/agents/)** — Learn how 23+ agents generate contracts
 - **[What Are Journeys?](/core-concepts/journeys/)** — Understand end-to-end workflows
-- **[Manual Contract Creation](/advanced/manual-contracts/)** — Write contracts by hand
+- **[Manual Contract Creation](/advanced/manual-contracts/)** -- Write contracts by hand
 
 ---
 
-## Compiler Analogy Reminder
-
-> **The compiler doesn't trust your types.**
->
-> **Specflow doesn't trust your architecture.**
-
-Both enforce boundaries automatically. Both block the build when violated.
-
-**That's the point.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)

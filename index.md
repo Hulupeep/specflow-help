@@ -12,6 +12,9 @@ permalink: /
 Specflow enforces architectural contracts like a compiler enforces types.
 {: .fs-6 .fw-300 }
 
+Specflow is a contract-driven development system for teams building with LLMs. It ships with default security, accessibility, and production-readiness gates (adapted from [forge](https://github.com/ikennaokpala/forge) by [Ikenna N. Okpala](https://github.com/ikennaokpala)), 23+ specialized agents that execute your GitHub backlog in parallel waves, and self-healing fix loops that auto-repair violations. When code breaks a contract, the build fails. When the build fails, agents fix it.
+{: .fs-5 .fw-300 }
+
 [Get Started](/getting-started/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 data-testid="get-started-btn" }
 [View on GitHub](https://github.com/Hulupeep/Specflow){: .btn .fs-5 .mb-4 .mb-md-0 }
 
@@ -104,7 +107,9 @@ Specflow isn't just a framework. It's a **methodology** powered by 23+ specializ
 - **[Security Gates](/core-concepts/security-accessibility/)**: OWASP Top 10 coverage — hardcoded secrets, SQL injection, XSS, eval, path traversal (SEC-001..005)
 - **[Accessibility Gates](/core-concepts/security-accessibility/)**: WCAG AA basics — alt text, aria-labels, form labels, focus order (A11Y-001..004)
 - **[Production Readiness](/core-concepts/production-readiness/)**: No demo data, placeholder domains, or hardcoded IDs in production (PROD-001..003)
-- **[Test Integrity](/core-concepts/security-accessibility/)**: No mocking in E2E tests, no placeholder assertions, no swallowed errors (TEST-001..005)
+- **[Test Integrity](/core-concepts/test-integrity/)**: No mocking in E2E tests, no placeholder assertions, no swallowed errors (TEST-001..005)
+
+Quality gates adapted from [forge](https://github.com/ikennaokpala/forge) by [Ikenna N. Okpala](https://github.com/ikennaokpala). See [Acknowledgments](/acknowledgments/).
 
 ### Self-Healing & Learning
 - **[Self-Healing Fix Loops](/advanced/self-healing/)**: Autonomous violation repair with confidence-tiered fix patterns (Platinum → Bronze)
@@ -208,3 +213,7 @@ Specflow synthesizes:
 **Start enforcing boundaries today.**
 
 [Get Started](/getting-started/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 data-testid="get-started-btn" }
+
+---
+
+[Acknowledgments](/acknowledgments/) -- Specflow builds on the work of others.

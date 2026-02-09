@@ -964,16 +964,8 @@ Now specflow-writer also generates contract tests (previously separate agent).
 - **[waves-controller Deep Dive](/agent-system/waves-controller/)** — Understand 8-phase orchestration
 - **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination
 - **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
-- **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts
+- **[Customizing Agents](/agent-system/customizing/)** -- Edit agent prompts
 
 ---
 
-## Compiler Analogy Reminder
-
-> **TypeScript has tools: `tsc`, `ts-node`, `tslint`.**
->
-> **Specflow has agents: 23+ specialized LLM workers.**
-
-Each agent is a compiler for a specific domain.
-
-**Compose them to automate architecture enforcement.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)

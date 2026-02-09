@@ -523,16 +523,8 @@ For multi-repo workflows, use API contract tests instead.
 
 - **[Agent System Deep Dive](/agent-system/)** — Learn how agents generate journeys
 - **[Journey Testing Guide](/advanced/journey-testing/)** — Advanced E2E patterns
-- **[Contract Schema Reference](/reference/contract-schema/)** — Full YAML format
+- **[Contract Schema Reference](/reference/contract-schema/)** -- Full YAML format
 
 ---
 
-## Compiler Analogy Reminder
-
-> **TypeScript rejects `"hello" + 5` at compile time.**
->
-> **Specflow rejects "Missing success message" at test time.**
-
-Same principle. Different boundary.
-
-**Journeys enforce end-to-end correctness.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)

@@ -12,6 +12,8 @@ permalink: /advanced/self-healing/
 Autonomous violation repair with confidence-tiered fix patterns.
 {: .fs-6 .fw-300 }
 
+> Self-healing fix loops adapted from [forge](https://github.com/ikennaokpala/forge) by [Ikenna N. Okpala](https://github.com/ikennaokpala). The concept of automated violation repair was adapted into Specflow's confidence-tiered fix pattern system.
+
 ---
 
 ## Table of contents

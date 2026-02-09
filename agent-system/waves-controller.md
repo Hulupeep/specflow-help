@@ -810,16 +810,8 @@ priority_weights:
 - **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 23+ agents
 - **[Agent Teams](/agent-system/agent-teams/)** — Persistent teammate coordination
 - **[DPAO Methodology](/agent-system/dpao/)** — Deep dive into parallel execution
-- **[Customizing Agents](/agent-system/customizing/)** — Edit agent prompts for your workflow
+- **[Customizing Agents](/agent-system/customizing/)** -- Edit agent prompts for your workflow
 
 ---
 
-## Compiler Analogy Reminder
-
-> **`tsc` orchestrates TypeScript compilation.**
->
-> **`waves-controller` orchestrates architecture verification.**
-
-Same pattern. Different domain.
-
-**One command to rule them all.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)

@@ -342,9 +342,4 @@ cd /your-project  # Must be in project root
 
 ---
 
-## Compiler Analogy Reminder
-
-> **TypeScript rejects type errors at compile time.**
-> **Specflow rejects architecture errors at test time.**
-
-Installation complete. Time to enforce some boundaries.
+[View on GitHub](https://github.com/Hulupeep/Specflow)

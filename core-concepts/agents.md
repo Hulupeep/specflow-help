@@ -546,14 +546,8 @@ Then reference it in waves-controller or invoke manually.
 
 - **[waves-controller Deep Dive](/agent-system/waves-controller/)** — Understand the 8-phase orchestration
 - **[Agent Reference](/agent-system/agent-reference/)** — Complete list of all 23+ agents
-- **[DPAO Methodology](/agent-system/dpao/)** — How parallel execution works
+- **[DPAO Methodology](/agent-system/dpao/)** -- How parallel execution works
 
 ---
 
-## Compiler Analogy Reminder
-
-> **TypeScript has `tsc`. Webpack has `webpack-cli`. Specflow has `waves-controller`.**
-
-All orchestrate specialized tools to transform inputs into verified outputs.
-
-**Agents are just build tools for architecture.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)

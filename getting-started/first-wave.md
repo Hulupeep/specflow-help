@@ -2,7 +2,7 @@
 layout: default
 title: Your First Wave
 parent: Getting Started
-nav_order: 2
+nav_order: 3
 permalink: /getting-started/first-wave/
 ---
 
@@ -519,12 +519,4 @@ waves-controller will analyze and warn if issues are ambiguous.
 
 ---
 
-## Compiler Analogy Reminder
-
-> **TypeScript catches `Cannot read property 'name' of undefined` at compile time.**
->
-> **Specflow catches "Missing RLS policy on users table" at test time.**
-
-Same principle. Different boundary.
-
-**You just enforced architecture automatically. Keep going.**
+[View on GitHub](https://github.com/Hulupeep/Specflow)
