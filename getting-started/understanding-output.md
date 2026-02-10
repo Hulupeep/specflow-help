@@ -534,6 +534,156 @@ Build failed. Fix journey to continue.
 
 ---
 
+## 6. Visualization Gallery
+
+When waves-controller executes, it renders 5 mandatory ASCII visualizations at specific phases. Use `/specflow status` to render all 5 on demand at any point.
+
+### EXECUTION TIMELINE (Phase 1, Phase 8)
+
+Shows where you are, what's done, what's next:
+
+```
+EXECUTION TIMELINE
+═══════════════════════════════════════════════════════════════
+
+ START                                              NOW
+  |                                                  |
+  [════ Wave 1 ════][════ Wave 2 ════][═ Wave 3 ══>
+  Commit a1b2c3d    Commit e4f5g6h    (active)
+  #50, #53          #51, #54          #52, #55
+
+  Wave 1: 2 issues  COMPLETE   Contracts: 2  Tests: 6
+  Wave 2: 2 issues  COMPLETE   Contracts: 2  Tests: 4
+  Wave 3: 2 issues  ACTIVE     Contracts: 1  Tests: 2 (pending)
+
+  Closed: 4/6 issues | Elapsed: 45 min | Est remaining: 1 wave
+═══════════════════════════════════════════════════════════════
+```
+
+### ENFORCEMENT MAP (Phase 1 per wave)
+
+The key visualization -- shows exactly what gets tested, by what mechanism, and when:
+
+```
+ENFORCEMENT MAP -- Wave 3
+═══════════════════════════════════════════════════════════════
+
+ Issue #52: Billing Integration
+ ├─ CONTRACT TESTS (build-time, pattern scan):
+ │   ├─ SEC-001: No hardcoded Stripe keys     → src/billing/**
+ │   ├─ SEC-002: No SQL concatenation          → src/billing/**
+ │   ├─ BILL-001: Must use paymentMiddleware   → src/routes/billing*
+ │   └─ BILL-002: Amounts must use Decimal     → src/billing/**
+ │
+ └─ PLAYWRIGHT TESTS (post-build, E2E):
+     ├─ J-BILLING-CHECKOUT: User completes checkout flow
+     ├─ J-BILLING-CANCEL: User cancels subscription
+     └─ J-BILLING-INVOICE: User views invoice history
+
+ Issue #55: Invoice PDF Export
+ ├─ CONTRACT TESTS:
+ │   ├─ SEC-005: No path traversal in export   → src/export/**
+ │   └─ INV-001: Must sanitize filenames       → src/export/**
+ │
+ └─ PLAYWRIGHT TESTS:
+     └─ J-BILLING-INVOICE: (shared with #52)
+
+ TOTALS: 6 contract rules enforced | 4 journey tests | 2 issues
+═══════════════════════════════════════════════════════════════
+```
+
+### DEPENDENCY TREE (Phase 1 per wave)
+
+Shows execution order and what blocks what:
+
+```
+DEPENDENCY TREE
+═══════════════════════════════════════════════════════════════
+
+ #50 User Profile [P:18] ─── Wave 1
+  ├──▶ #51 Profile Settings [P:22] ─── Wave 2
+  │     └──▶ #52 Notifications [P:15] ─── Wave 3
+  └──▶ #54 Profile Analytics [P:12] ─── Wave 2
+
+ #53 Admin Dashboard [P:15] ─── Wave 1 (independent)
+
+ #48 Payments [P:25] ─── Wave 1
+  ├──▶ #55 Billing History [P:14] ─── Wave 2
+  └──▶ #56 Invoices [P:11] ─── Wave 3
+        └──▶ #57 PDF Export [P:8] ─── Wave 4
+
+ Legend: [P:N] = priority score | ──▶ = blocks
+ Parallel: Wave 1 runs #50, #53, #48 simultaneously
+═══════════════════════════════════════════════════════════════
+```
+
+### PARALLEL AGENT MODEL (Phase 4)
+
+Shows who is working on what right now:
+
+```
+WAVE 3 EXECUTION -- Team Brigid's Forge
+═══════════════════════════════════════════════════════════════
+
+ ┌─────────────────┐  ┌─────────────────┐
+ │ Heaney (#52)    │  │ Goibniu (#55)   │
+ │ Billing Integ.  │  │ Invoice Export   │
+ │                 │  │                 │
+ │ [spec]     done │  │ [spec]     done │
+ │ [contract] done │  │ [contract] done │
+ │ [build]  ██░░░░ │  │ [build]    done │
+ │ [test]  pending │  │ [test]   ██░░░░ │
+ └─────────────────┘  └─────────────────┘
+
+ ┌─────────────────┐  ┌─────────────────┐
+ │ Hamilton        │  │ Keane           │
+ │ db-coordinator  │  │ quality-gate    │
+ │                 │  │                 │
+ │ Migrations: 2   │  │ Contracts: PASS │
+ │ Conflicts: 0    │  │ E2E: pending    │
+ └─────────────────┘  └─────────────────┘
+
+ Active: 4 agents | Files touched: 12 | Dependencies: 1/2 resolved
+═══════════════════════════════════════════════════════════════
+```
+
+### SPRINT SUMMARY TABLE (Phase 8)
+
+Running total across all completed waves:
+
+```
+SPRINT SUMMARY
+═══════════════════════════════════════════════════════════════
+
+ Wave │ Team           │ Issues    │ Files │ LOC       │ Key Outputs
+ ─────┼────────────────┼───────────┼───────┼───────────┼──────────────────
+    1 │ Fianna         │ #50,#53,#48│   15 │ +847/-23  │ Auth, admin, payments
+    2 │ Red Branch     │ #51,#54,#55│   12 │ +612/-31  │ Settings, analytics, billing
+    3 │ Brigid's Forge │ #52,#55   │    8 │ +404/-12  │ Notifications, invoices
+ ─────┼────────────────┼───────────┼───────┼───────────┼──────────────────
+ TOTAL│                │ 8 issues  │   35 │ +1863/-66 │ 8 contracts, 14 tests
+
+ Contracts: 8 generated, 8 passing
+ Tests: 14 (6 contract, 8 Playwright) -- all green
+ Duration: 1h 12m (sequential estimate: 3h 40m → 67% time saved)
+═══════════════════════════════════════════════════════════════
+```
+
+---
+
+## Compiler Analogy Recap
+
+| TypeScript | Specflow |
+|------------|----------|
+| Type definitions (`.d.ts`) | Contracts (`.yml`) |
+| Type checker (`tsc`) | Contract tests (`vitest`) |
+| Runtime assertions | E2E tests (`playwright`) |
+| `Type 'string' is not assignable to 'number'` | `CONTRACT VIOLATION: AUTH-001` |
+| Build blocked until fixed | Build blocked until fixed |
+
+**Same enforcement model. Different domain.**
+
+---
 ## Next Steps
 
 Now that you understand output:

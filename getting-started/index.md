@@ -50,7 +50,7 @@ When your project outgrows SKILL.md, the full agent library lets **agents do the
 
 **This guide focuses on the agent-first workflow.** Manual setup is covered in [Advanced](/advanced/).
 
-> **Agent Teams mode (Claude Code 4.6+):** For complex multi-issue waves, enable persistent peer-to-peer teammates with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true`. See [Agent Teams](/agent-system/agent-teams/) for details.
+> **Agent Teams mode (default on Claude Code 4.6+):** Persistent peer-to-peer teammates activate automatically when TeammateTool is available. No environment variable needed. See [Agent Teams](/agent-system/agent-teams/) for details.
 
 ---
 
@@ -180,6 +180,7 @@ If the test fails, the build fails. **No manual review needed.**
 - **[Run Your First Wave](/getting-started/first-wave/)** -- Execute waves-controller on your own project
 - **[Install Hooks](/advanced/journey-verification-hooks/)** -- Auto-run E2E tests at build boundaries
 - **[Understand Contracts](/core-concepts/contracts/)** -- Learn what contracts enforce
+- **[Team Workflows](/core-concepts/team-workflows/)** -- CSV journeys, local enforcement, CI compliance
 - **[Explore Agents](/agent-system/)** -- Dive into the 23+ agent types
 - **[Agent Teams](/agent-system/agent-teams/)** -- Persistent teammate coordination (Claude Code 4.6+)
 - **[Read the Background](/background/)** -- Understand the academic foundation

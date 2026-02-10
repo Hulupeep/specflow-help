@@ -477,6 +477,32 @@ Total: 2 minutes
 
 ---
 
+## CSV Authoring (Team Workflows)
+
+Not everyone on the team writes YAML. Product designers can define journeys in **CSV format** using Google Sheets, Excel, or any text editor:
+
+```csv
+journey_id,journey_name,step,user_does,system_shows,critical,owner,notes
+J-SIGNUP-FLOW,User Signup,1,Clicks "Sign Up",Shows registration form,yes,@alice,
+J-SIGNUP-FLOW,User Signup,2,Fills email + password,Validates in real-time,yes,@alice,
+J-SIGNUP-FLOW,User Signup,3,Clicks submit,Shows success + redirect to dashboard,yes,@alice,Must receive welcome email
+```
+
+The `specflow-compile` script converts this into YAML journey contracts and Playwright test stubs:
+
+```bash
+npm run compile:journeys -- journeys.csv
+# Generates:
+#   docs/contracts/journey_signup_flow.yml
+#   tests/e2e/journey_signup_flow.spec.ts
+```
+
+**CSV is the entry point. YAML contracts are the enforcement layer. Tests are the proof.**
+
+For the full CSV column reference, see [CSV Journey Schema](/reference/csv-journey-schema/). For the team workflow guide, see [Team Workflows](/core-concepts/team-workflows/).
+
+---
+
 ## Common Questions
 
 ### "Do I need journeys for every feature?"

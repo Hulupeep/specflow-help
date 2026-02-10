@@ -24,17 +24,19 @@ Persistent peer-to-peer teammates powered by Claude Code 4.6 TeammateTool API.
 
 ## What are Agent Teams?
 
-Agent Teams is Specflow's next-generation execution model built on the **Claude Code 4.6 TeammateTool API**. Instead of spawning short-lived subagents that report back to a hub, Agent Teams creates **persistent teammates** that communicate **peer-to-peer** and maintain context across their entire lifecycle.
+Agent Teams is Specflow's **default execution model** built on the **Claude Code 4.6 TeammateTool API**. Instead of spawning short-lived subagents that report back to a hub, Agent Teams creates **persistent teammates** that communicate **peer-to-peer** and maintain context across their entire lifecycle.
+
+Detection is automatic — no environment variable needed. When TeammateTool is available (Claude Code 4.6+), Agent Teams activates. When unavailable, Specflow falls back to subagent mode.
 
 **Think of it like a real development team:**
-- Subagent mode: A manager hands out tasks and collects results (hub-and-spoke)
-- Agent Teams mode: A team of developers who talk directly to each other (peer-to-peer)
+- Subagent mode (fallback): A manager hands out tasks and collects results (hub-and-spoke)
+- Agent Teams mode (default): A team of developers who talk directly to each other (peer-to-peer)
 
 ---
 
 ## How It Differs from Subagent Mode
 
-| Aspect | Subagent Mode (Default) | Agent Teams Mode |
+| Aspect | Subagent Mode (Fallback) | Agent Teams Mode (Default) |
 |--------|------------------------|------------------|
 | **Topology** | Hub-and-spoke (waves-controller dispatches) | Peer-to-peer (teammates coordinate directly) |
 | **Context** | Stateless (each agent starts fresh) | Persistent (context preserved for issue lifetime) |
@@ -47,20 +49,22 @@ Agent Teams is Specflow's next-generation execution model built on the **Claude 
 
 ## Enabling Agent Teams
 
-Set the environment variable before starting Claude Code:
+Agent Teams activates automatically when TeammateTool is available (Claude Code 4.6+). No environment variable or configuration needed.
 
-```bash
-export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true
+```
+Phase 0: Capability Detection
+
+TeammateTool available → Agent Teams mode (default)
+  → Persistent teammates, peer-to-peer coordination
+  → Three-tier journey gates
+  → Mandatory execution visualizations
+
+TeammateTool unavailable → Subagent mode (fallback)
+  → Task tool spawns one-shot agents
+  → Hub-and-spoke coordination
 ```
 
-Or add it to your shell profile:
-
-```bash
-# ~/.bashrc or ~/.zshrc
-export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true
-```
-
-When this variable is **not set**, Specflow falls back to subagent mode automatically. All existing workflows continue to work unchanged.
+When TeammateTool is **not available**, Specflow falls back to subagent mode automatically. All existing workflows continue to work unchanged.
 
 ---
 
@@ -290,18 +294,14 @@ All inter-agent messages follow a structured protocol. Each message type has a d
 
 ## Backward Compatibility
 
-Agent Teams is **fully backward compatible**. When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` is not set:
+Agent Teams is **fully backward compatible**. When TeammateTool is not available:
 
 - waves-controller uses the standard subagent spawning model
 - All existing agent prompts in `scripts/agents/*.md` work unchanged
 - No new infrastructure files are required
 - The 18 original agents operate identically
 
-**Upgrade path:**
-1. Set the environment variable
-2. Add the 5 new agent prompt files to `scripts/agents/`
-3. waves-controller auto-detects and switches to team mode
-4. Remove the env var to revert at any time
+**No setup needed** — if you're on Claude Code 4.6+, Agent Teams is already active. The 5 team agent prompt files (`issue-lifecycle`, `db-coordinator`, `quality-gate`, `journey-gate`, `PROTOCOL`) should be in `scripts/agents/`.
 
 ---
 
@@ -371,7 +371,7 @@ Verdict: NO REGRESSIONS (safe to proceed)
 Here is how a typical wave executes in Agent Teams mode:
 
 ```
-1. waves-controller detects CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true
+1. waves-controller detects TeammateTool availability
 2. Phase 1 (Discovery): Same as subagent mode
 3. Phase 2 (Team Spawning):
    - Spawn issue-lifecycle for each Wave 1 issue

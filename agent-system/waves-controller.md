@@ -57,6 +57,46 @@ waves-controller executes in 8 sequential phases:
 
 ---
 
+## Mandatory Visualizations
+
+waves-controller renders 5 ASCII visualizations at specific phases. These are the trust layer — they make every phase visible, every dependency explicit, every test mapped.
+
+| Phase | Visualization | Purpose |
+|-------|--------------|---------|
+| Phase 1 (first wave) | EXECUTION TIMELINE | "Here's what's about to happen" |
+| Phase 1 (every wave) | DEPENDENCY TREE | "Here's the execution order" |
+| Phase 1 (every wave) | ENFORCEMENT MAP | "Here's what gets tested and how" |
+| Phase 4 (during work) | PARALLEL AGENT MODEL | "Here's who's working on what now" |
+| Phase 8 (wave end) | SPRINT SUMMARY TABLE | "Here's what this wave delivered" |
+| Phase 8 (wave end) | EXECUTION TIMELINE (updated) | "Here's progress so far" |
+| `/specflow status` | ALL five visualizations | On-demand full dashboard |
+
+The **ENFORCEMENT MAP** is the key visualization — it answers "what exactly will be tested, by what mechanism, and when?" for every issue:
+
+```
+ENFORCEMENT MAP — Wave 3
+═══════════════════════════════════════════════════════════════
+
+ Issue #52: Billing Integration
+ ├─ CONTRACT TESTS (build-time, pattern scan):
+ │   ├─ SEC-001: No hardcoded Stripe keys     → src/billing/**
+ │   ├─ SEC-002: No SQL concatenation          → src/billing/**
+ │   ├─ BILL-001: Must use paymentMiddleware   → src/routes/billing*
+ │   └─ BILL-002: Amounts must use Decimal     → src/billing/**
+ │
+ └─ PLAYWRIGHT TESTS (post-build, E2E):
+     ├─ J-BILLING-CHECKOUT: User completes checkout flow
+     ├─ J-BILLING-CANCEL: User cancels subscription
+     └─ J-BILLING-INVOICE: User views invoice history
+
+ TOTALS: 4 contract rules enforced | 3 journey tests | 1 issue
+═══════════════════════════════════════════════════════════════
+```
+
+See `agents/waves-controller.md` in the Specflow repo for all 5 visualization templates.
+
+---
+
 ## Phase 1: Discovery
 
 **Goal:** Understand all open issues and their dependencies.
@@ -597,24 +637,28 @@ Execute waves
 
 ---
 
-## Agent Teams Mode
+## Agent Teams Mode (Default)
 
-When `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true` is set, waves-controller automatically adapts its execution model from hub-and-spoke subagent dispatching to persistent peer-to-peer teammate coordination.
+Agent Teams is the default execution model. waves-controller automatically detects TeammateTool availability and uses persistent peer-to-peer teammate coordination when available.
 
 ### Auto-Detection
 
-waves-controller checks for the environment variable at startup:
+waves-controller checks for TeammateTool capability at startup:
 
 ```
-Phase 0: Environment Detection
+Phase 0: Capability Detection
 
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=true detected
-  → Switching to Agent Teams mode
-  → TeammateTool API available
-  → Peer-to-peer coordination enabled
+TeammateTool available → Agent Teams mode (default)
+  → Persistent teammates, peer-to-peer coordination
+  → Three-tier journey gates
+  → Mandatory execution visualizations
+
+TeammateTool unavailable → Subagent mode (fallback)
+  → Task tool spawns one-shot agents
+  → Hub-and-spoke coordination
 ```
 
-If the variable is not set, waves-controller proceeds with standard subagent mode. No configuration changes required.
+No environment variable needed. Detection is automatic.
 
 ### Phase Changes in Agent Teams Mode
 

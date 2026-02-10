@@ -176,6 +176,7 @@ journey_meta:
   issue: "#<number>"                      # Required: GitHub issue reference
   status: not_tested | passing | failing  # Required: current test status
   last_verified: <ISO-date> | null        # Required: when tests last ran green
+  owner: <string>                         # Optional: team or person responsible (e.g., @alice)
 
 # ─── Preconditions ─────────────────────────────────────────
 preconditions:
@@ -324,6 +325,18 @@ acceptance_criteria:
   - "Request appears in list with 'pending' status"
   - "Success notification is shown"
 ```
+
+---
+
+## CSV Journey Format
+
+For teams where product designers define journeys in spreadsheets, the CSV format provides a non-technical entry point that compiles to standard journey contracts.
+
+```bash
+npm run compile:journeys -- journeys.csv
+```
+
+See the full [CSV Journey Schema Reference](/reference/csv-journey-schema/) for column definitions, validation rules, and examples.
 
 ---
 
