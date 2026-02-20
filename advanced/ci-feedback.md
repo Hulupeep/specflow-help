@@ -144,7 +144,7 @@ chmod +x .claude/hooks/post-push-ci.sh
         "hooks": [
           {
             "type": "command",
-            "command": "bash .claude/hooks/post-push-ci.sh"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/post-push-ci.sh"
           }
         ]
       }
@@ -152,6 +152,8 @@ chmod +x .claude/hooks/post-push-ci.sh
   }
 }
 ```
+
+**Note:** Use `"$CLAUDE_PROJECT_DIR"` to ensure the hook resolves correctly regardless of the shell's current working directory.
 
 ---
 

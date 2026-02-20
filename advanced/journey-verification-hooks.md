@@ -163,8 +163,12 @@ bash install-hooks.sh /path/to/your/project
 ```
 
 This installs:
-- `.claude/settings.json` - Hook triggers
-- `.claude/hooks/journey-verification.md` - Behavior spec
+- `.claude/settings.json` — Hook triggers (PostToolUse events for Bash)
+- `.claude/hooks/post-build-check.sh` — Detects builds/commits, triggers journey tests
+- `.claude/hooks/run-journey-tests.sh` — Maps issue journey IDs to test files, runs them
+- `.claude/hooks/post-push-ci.sh` — Polls GitHub Actions CI status after `git push`
+
+**Requirements:** The journey test hooks require `gh` CLI installed and authenticated (`gh auth login`). If `gh` is missing or not authenticated, the hooks exit with a model-visible error (exit code 2) so Claude reports the problem instead of silently skipping.
 
 Then add configuration to your `CLAUDE.md`:
 

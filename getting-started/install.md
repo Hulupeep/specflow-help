@@ -103,7 +103,9 @@ bash /tmp/specflow/install-hooks.sh /path/to/your-project
 # Output:
 # ✓ Created .claude/hooks/
 # ✓ Installed .claude/settings.json
-# ✓ Installed journey-verification.md
+# ✓ Installed post-build-check.sh
+# ✓ Installed run-journey-tests.sh
+# ✓ Installed post-push-ci.sh
 ```
 
 Then add configuration to your `CLAUDE.md`:
