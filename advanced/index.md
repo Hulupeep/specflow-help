@@ -25,6 +25,7 @@ This section covers advanced workflows for power users:
 - **[Self-Healing Fix Loops](/advanced/self-healing/)** — Autonomous violation repair with confidence-tiered patterns
 - **[Post-Mortem Learning System](/advanced/learning-system/)** — Violations get recorded, fixes get stored, agents get warned
 - **[CI Feedback Loop](/advanced/ci-feedback/)** — Automatic CI status reporting after every git push
+- **[Drift Prevention](/advanced/drift-prevention/)** — Three enforcement layers (hooks + CI + deploy gate) that stop spec-to-code drift
 
 **Note:** Most users should start with the [agent-first workflow](/getting-started/). Manual setup is 3-4x slower but gives more control.
 
@@ -58,18 +59,22 @@ See [Journey Verification Hooks](/advanced/journey-verification-hooks/) for setu
 | [Self-Healing Fix Loops](/advanced/self-healing/) | Autonomous violation repair with confidence-tiered fix patterns |
 | [Post-Mortem Learning System](/advanced/learning-system/) | How violations and fixes become agent warnings |
 | [CI Feedback Loop](/advanced/ci-feedback/) | Automatic CI status polling after git push |
+| [Drift Prevention](/advanced/drift-prevention/) | Three enforcement layers that stop spec-to-code drift |
 
 ---
 
-## The Two Enforcement Layers
+## The Three Enforcement Layers
 
-Specflow uses **local hooks** AND **remote CI** together:
+Specflow uses **edit-time hooks**, **CI contract tests**, and **deploy gates** together:
 
-| Layer | Where | When | Speed |
-|-------|-------|------|-------|
-| **Hooks** | Your machine | Build, commit | Seconds |
-| **CI** | GitHub | PR, merge | Minutes |
+| Layer | Where | When | Speed | Catches |
+|-------|-------|------|-------|---------|
+| **Edit-time hooks** | Agent's editor | Write/Edit tool call | Instant | Pattern violations in the file being edited |
+| **CI contract tests** | GitHub Actions | Push/PR | Minutes | All pattern violations + journey regressions |
+| **Deploy gate** | Production | After deploy | After deploy | Route availability, infrastructure, E2E |
 
-**Hooks** catch problems before you push. **CI** is the authoritative gate.
+**Hooks** catch violations while the agent is coding. **CI** is the merge gate. **Deploy gates** verify the live system.
+
+See [Drift Prevention](/advanced/drift-prevention/) for the full framework with real-world examples.
 
 [View on GitHub](https://github.com/Hulupeep/Specflow)
