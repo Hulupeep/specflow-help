@@ -24,34 +24,18 @@ Get Specflow running in your project in under 5 minutes.
 
 ## Prerequisites
 
-Before installing Specflow, ensure you have:
-
 ### Required Tools
 
 | Tool | Version | Purpose | Check Command |
 |------|---------|---------|---------------|
 | **Claude Code** | Latest | Runs Specflow agents | `claude --version` |
-| **Node.js** | 18.0.0+ | Agent execution environment | `node --version` |
+| **Node.js** | 18.0.0+ | CLI and test execution | `node --version` |
 | **Git** | Any recent | Repository operations | `git --version` |
 | **GitHub CLI** | 2.0.0+ | Issue tracking integration | `gh --version` |
-
-### Environment Setup
-
-You need **Claude or OpenAI API access**:
-
-```bash
-# Option 1: Claude (recommended)
-export ANTHROPIC_API_KEY=sk-ant-...
-
-# Option 2: OpenAI
-export OPENAI_API_KEY=sk-...
-```
-
-Add to `~/.bashrc` or `~/.zshrc` to persist.
+| **jq** | Any | Hook JSON parsing | `jq --version` |
 
 ### Repository Requirements
 
-Specflow works best with:
 - ✅ **GitHub repository** (for issue tracking)
 - ✅ **Existing codebase** (Specflow adapts to your stack)
 - ✅ **Test framework** (Playwright, Jest, Vitest, etc.)
@@ -62,95 +46,52 @@ Specflow works best with:
 
 ## Installation Methods
 
-### Method 1: Extract to Existing Project (Recommended)
+### Method 1: npx (Recommended)
 
-If you already have a project, extract Specflow into it:
+One command. No cloning. No samples. Just what your project needs.
 
 ```bash
-# 1. Clone Specflow repository
-git clone https://github.com/Hulupeep/Specflow.git /tmp/specflow
-
-# 2. Navigate to your project
 cd /path/to/your-project
-
-# 3. Run extraction script
-/tmp/specflow/scripts/extract-to-project.sh
-
-# Output:
-# ✓ Copying Specflow/ directory
-# ✓ Copying scripts/agents/
-# ✓ Creating docs/contracts/
-# ✓ Updating .gitignore
-# ✓ Installation complete!
+npx @colmbyrne/specflow init .
 ```
 
-This adds:
-- `Specflow/` — Core methodology files
-- `scripts/agents/` — 23+ agent prompts
-- `docs/contracts/` — Contract storage
-- `.claude/hooks/` — Journey verification hooks
-- Updated `.gitignore` — Excludes agent temp files
+This creates:
+- `docs/contracts/` — Default contract templates (security, accessibility, test integrity)
+- `scripts/agents/` — 30+ agent prompts
+- `tests/contracts/` — Contract schema tests
+- `.claude/hooks/` — Journey verification, pipeline compliance, CI polling hooks
+- `.git/hooks/commit-msg` — Rejects commits without issue numbers
+- `.specflow/baseline.json` — Regression test baseline
+- `package.json` — npm scripts for test/verify/compile (if not already present)
 
-### Install Journey Verification Hooks (Recommended)
+### Method 2: Clone + Setup Script
 
-Hooks make Claude run E2E tests automatically at build boundaries:
+If you prefer a local Specflow source (for version checking and offline use):
 
 ```bash
-# If using extract-to-project.sh, hooks are included
-# If installing separately:
-bash /tmp/specflow/install-hooks.sh /path/to/your-project
+# 1. Clone Specflow
+git clone https://github.com/Hulupeep/Specflow.git /path/to/Specflow
 
-# Output:
-# ✓ Created .claude/hooks/
-# ✓ Installed .claude/settings.json
-# ✓ Installed post-build-check.sh
-# ✓ Installed run-journey-tests.sh
-# ✓ Installed post-push-ci.sh
+# 2. Run setup from your project
+cd /path/to/your-project
+bash /path/to/Specflow/setup-project.sh .
 ```
 
-Then add configuration to your `CLAUDE.md`:
+### Method 3: Hooks Only
 
-```markdown
-## Test Configuration
-
-- **Package Manager:** pnpm
-- **Test Command:** `pnpm test:e2e`
-- **Production URL:** `https://yourapp.com`
-- **Deploy Platform:** Vercel
-```
-
-**Why hooks?** Without them, you ask "run tests" manually. You'll forget. Production breaks.
-
-### Method 2: Fresh Project Setup
-
-Starting from scratch:
+If you already have agents and contracts but need the hooks:
 
 ```bash
-# 1. Create new repository
-mkdir my-project && cd my-project
-git init
-
-# 2. Clone Specflow
-git clone https://github.com/Hulupeep/Specflow.git .
-
-# 3. Install dependencies (if you want to run examples)
-npm install
+npx @colmbyrne/specflow update . --ci
 ```
 
-### Method 3: Manual Integration
-
-For custom setups, copy just what you need:
+Or from a local clone:
 
 ```bash
-# Copy agent prompts only
-cp -r /path/to/Specflow/scripts/agents /your-project/scripts/agents
-
-# Copy methodology docs
-cp -r /path/to/Specflow/Specflow /your-project/Specflow
-
-# Copy contract examples
-cp -r /path/to/Specflow/docs/contracts /your-project/docs/contracts
+bash /path/to/Specflow/install-hooks.sh . --ci
 ```
+
+The `--ci` flag also installs GitHub Actions workflows for PR compliance and post-merge audit.
 
 ---
 
@@ -159,189 +100,142 @@ cp -r /path/to/Specflow/docs/contracts /your-project/docs/contracts
 After installation, verify everything works:
 
 ```bash
-# 1. Check Specflow directory exists
-ls -la Specflow/
-# Should show: CONTRACTS-README.md, CONTRACT-SCHEMA.md, etc.
-
-# 2. Check agents directory exists
-ls -la scripts/agents/
-# Should show: waves-controller.md, specflow-writer.md, etc.
-
-# 3. Verify Claude Code can read agents
-claude --version
-# Should output: Claude Code vX.X.X
-
-# 4. Test GitHub CLI access
-gh repo view
-# Should show your repository details
+npx @colmbyrne/specflow verify
 ```
 
-### Optional: Run Verification Script
+This runs 13 sections of checks:
 
-If you used Method 1, run the verification script:
+| Section | What it checks |
+|---------|---------------|
+| 1. Directory structure | `docs/contracts/`, test dirs exist |
+| 2. Contract files | Count and list all contracts |
+| 3. YAML validation | All contracts are valid YAML |
+| 4. Test infrastructure | package.json, jest/vitest, test scripts |
+| 5. CLAUDE.md | Exists, has contracts, no placeholders |
+| 6. CI/CD | specflow-compliance.yml, specflow-audit.yml |
+| 7. E2E setup | Playwright config and test count |
+| 8. Hooks | All 5 scripts installed, executable, wired in settings.json |
+| 9. Agent library | scripts/agents/, waves-controller present |
+| 10. Fix patterns | .specflow/ state files |
+| 11. Contract metadata | test_hooks.e2e_test_file paths resolve |
+| 12. Graph validator | Cross-reference integrity |
+| 13. Version check | Local hooks match Specflow source |
+
+**Passing setup shows:**
+- 20+ checks passed
+- 0 failed
+- Warnings are optional recommendations
+
+---
+
+## What Gets Installed
+
+### Hooks (automatic enforcement)
+
+| Hook | Trigger | What it does |
+|------|---------|-------------|
+| `post-build-check.sh` | Build / commit | Triggers journey tests |
+| `run-journey-tests.sh` | Called by post-build | Maps issues → journeys → Playwright tests |
+| `check-pipeline-compliance.sh` | Write / Edit | Catches contract violations in real-time |
+| `post-push-ci.sh` | Push | Reports CI status (advisory) |
+| `commit-msg` | Git commit | Rejects commits without `#issue-number` |
+
+### Agent Prompts (30+)
+
+| Agent | Role |
+|-------|------|
+| `waves-controller` | Master orchestrator — executes entire backlog |
+| `specflow-writer` | Creates contracts from issues |
+| `board-auditor` | Checks issue compliance |
+| `pre-flight-simulator` | Simulates specs before code is written |
+| `journey-gate` | Three-tier journey enforcement |
+| ... | See `scripts/agents/README.md` for full list |
+
+### Default Contracts
+
+| Contract | What it catches |
+|----------|----------------|
+| `security_defaults.yml` | Hardcoded secrets, SQL injection, XSS, eval |
+| `accessibility_defaults.yml` | Missing alt text, aria-labels, form labels |
+| `test_integrity_defaults.yml` | Mocking in E2E tests, placeholder markers |
+| `production_readiness_defaults.yml` | Demo data in production, placeholder domains |
+
+---
+
+## CLI Reference
 
 ```bash
-./scripts/verify-setup.sh
-
-# Output:
-# ✓ Specflow/ directory found
-# ✓ scripts/agents/ directory found (23+ agents)
-# ✓ docs/contracts/ directory found
-# ✓ CLAUDE.md or .clauderc configured
-# ✓ GitHub CLI authenticated
-# ✓ API key configured (ANTHROPIC_API_KEY or OPENAI_API_KEY)
-#
-# ✅ Specflow is ready to use!
+npx @colmbyrne/specflow init .          # Full setup (safe to re-run)
+npx @colmbyrne/specflow verify          # 13-section installation check
+npx @colmbyrne/specflow update . --ci   # Update hooks + CI workflows
+npx @colmbyrne/specflow audit 500       # Audit issue #500 for compliance
+npx @colmbyrne/specflow graph           # Validate contract cross-references
+npx @colmbyrne/specflow help            # Show all commands
 ```
+
+---
+
+## Updating
+
+```bash
+# Update hooks and CI workflows to latest
+npx @colmbyrne/specflow update . --ci
+
+# Check if anything is outdated
+npx @colmbyrne/specflow verify
+```
+
+Section 13 of `verify` diffs your installed hooks against the latest Specflow source and shows what's outdated with severity and impact.
 
 ---
 
 ## Configuration
 
-### 1. Add Specflow Instructions to Claude Code
-
-Create or update `CLAUDE.md` in your project root:
+After installation, update `CLAUDE.md` with your project context:
 
 ```markdown
-# Specflow Integration
+## Project Context
 
-This project uses Specflow contracts for architectural enforcement.
-
-## Agent Execution Rules
-
-1. **Check GitHub Issues First**: All work MUST have a GitHub issue
-2. **Run Contract Tests**: `npm test -- contracts` before marking work complete
-3. **Verify Journeys**: Critical journeys MUST pass before close
-4. **Use Subagent Library**: Read `scripts/agents/*.md` before spawning agents
-
-## Subagent Library
-
-| Agent | Prompt File | When to Use |
-|-------|------------|-------------|
-| `waves-controller` | `scripts/agents/waves-controller.md` | User says "execute waves" |
-| `specflow-writer` | `scripts/agents/specflow-writer.md` | Create contracts from issues |
-| `contract-validator` | `scripts/agents/contract-validator.md` | Verify implementation matches spec |
-| `test-runner` | `scripts/agents/test-runner.md` | Run tests after changes |
-
-See `scripts/agents/README.md` for full agent list.
+**Repository:** your-org/your-repo
+**Project Board:** GitHub Issues
+**Board CLI:** gh
+**Tech Stack:** React, Node, Supabase
 ```
 
-### 2. Update .gitignore (Already Done by Script)
-
-Ensure these are ignored:
-
-```gitignore
-# Specflow temp files
-.specflow-temp/
-agent-outputs/
-.agent-state/
-```
-
-### 3. Configure Test Commands
-
-Add to `package.json`:
-
-```json
-{
-  "scripts": {
-    "test:contracts": "jest --testPathPattern=contracts",
-    "test:e2e": "playwright test",
-    "verify:all": "npm run test:contracts && npm run test:e2e"
-  }
-}
-```
-
----
-
-## What You Just Installed
-
-### Specflow Methodology Files
-
-Located in `Specflow/`:
-
-| File | Purpose |
-|------|---------|
-| `CONTRACTS-README.md` | System overview, how contracts work |
-| `CONTRACT-SCHEMA.md` | YAML format specification |
-| `LLM-MASTER-PROMPT.md` | How LLMs should work with contracts |
-| `SPEC-FORMAT.md` | Writing specifications |
-| `CI-INTEGRATION.md` | GitHub Actions setup |
-
-### Agent Prompts
-
-Located in `scripts/agents/`:
-
-| Agent | File | Role |
-|-------|------|------|
-| **waves-controller** | `waves-controller.md` | Orchestrates all other agents |
-| **specflow-writer** | `specflow-writer.md` | Creates contracts from issues |
-| **migration-builder** | `migration-builder.md` | Generates database migrations |
-| **playwright-from-specflow** | `playwright-from-specflow.md` | Creates E2E tests from Gherkin |
-| **contract-validator** | `contract-validator.md` | Verifies implementation |
-| **test-runner** | `test-runner.md` | Executes tests, reports failures |
-| ... | (23+ total) | See `scripts/agents/README.md` |
-
-### Contract Storage
-
-Located in `docs/contracts/`:
-
-This is where generated contracts will be stored:
-- `feature_*.yml` — Architectural invariants
-- `journey_*.yml` — End-to-end workflows
-
-**Starts empty.** Agents populate it as you work.
-
----
-
-## Next Steps
-
-Now that Specflow is installed:
-
-1. **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on a GitHub issue
-2. **[Understand Output](/getting-started/understanding-output/)** — Learn to read contracts and test results
-3. **[Explore Agents](/agent-system/)** — Dive deeper into the 23+ agent types
+This is required — without it, Claude doesn't know your project and agents can't fetch issues.
 
 ---
 
 ## Troubleshooting
 
-### "command not found: claude"
+### "npx: command not found"
 
-**Solution:** Install Claude Code CLI:
-```bash
-npm install -g @anthropic-ai/claude-code
-```
+Node.js 18+ includes npx. Update Node: `nvm install 20`
 
 ### "gh: command not found"
 
-**Solution:** Install GitHub CLI:
-```bash
-# macOS
-brew install gh
+Install GitHub CLI: `brew install gh` (mac) or `sudo apt install gh` (linux)
 
-# Linux
-sudo apt install gh
+### "jq: command not found"
 
-# Windows
-winget install GitHub.cli
-```
+Install jq: `brew install jq` (mac) or `sudo apt install jq` (linux). Required for hook JSON parsing.
 
-### "API key not configured"
+### Commit rejected unexpectedly
 
-**Solution:** Set environment variable:
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-# Add to ~/.bashrc or ~/.zshrc to persist
-```
+The `commit-msg` hook requires `#issue-number` in every commit. Bypass with `--no-verify` (not recommended).
 
-### "Specflow/ directory not found after extraction"
+### Pipeline compliance hook fires on example files
 
-**Solution:** Run extraction script from correct directory:
-```bash
-cd /your-project  # Must be in project root
-/tmp/specflow/scripts/extract-to-project.sh
-```
+If `docs/journeys/` contains index or metadata CSVs, the hook may false-positive. Index files (`*INDEX*`, `*README*`) are now excluded automatically.
 
 ---
 
-[View on GitHub](https://github.com/Hulupeep/Specflow)
+## Next Steps
+
+1. **[Verify It's Working](/getting-started/verify-setup/)** — Confirm enforcement is active
+2. **[Run Your First Wave](/getting-started/first-wave/)** — Execute waves-controller on your issues
+3. **[Understand Output](/getting-started/understanding-output/)** — Read contracts and test results
+
+---
+
+[View on GitHub](https://github.com/Hulupeep/Specflow) | [npm package](https://www.npmjs.com/package/@colmbyrne/specflow)

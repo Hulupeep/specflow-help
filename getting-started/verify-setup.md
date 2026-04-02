@@ -194,25 +194,16 @@ cp Specflow/templates/contracts/*.yml docs/contracts/
 
 ### 5. Run the verification script
 
-The `verify-setup.sh` script checks all 10 sections of a Specflow installation:
+Run the 13-section verification:
 
 ```bash
-bash verify-setup.sh .
+npx @colmbyrne/specflow verify
 
-# Expected output:
-# [1/10] CLAUDE.md exists .............. PASS
-# [2/10] Contract section in CLAUDE.md . PASS
-# [3/10] docs/contracts/ exists ........ PASS
-# [4/10] Contract files found .......... PASS (3 contracts)
-# [5/10] Agent prompts installed ....... PASS (23 agents)
-# [6/10] Hooks installed ............... PASS
-# [7/10] Test command configured ....... PASS
-# [8/10] GitHub CLI authenticated ...... PASS
-# [9/10] Node.js version .............. PASS (v20.11.0)
-# [10/10] API key configured .......... PASS
-#
-# Result: 10/10 checks passed
+# Or from a local clone:
+# bash /path/to/Specflow/verify-setup.sh
 ```
+
+Checks: directory structure, contract files, YAML validation, test infrastructure, CLAUDE.md, CI/CD, E2E setup, hooks (installed + executable + wired), agent library, fix patterns, contract metadata, graph validator, and version check (local vs source).
 
 ---
 
