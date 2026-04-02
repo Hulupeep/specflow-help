@@ -56,6 +56,7 @@ npx @colmbyrne/specflow init .
 ```
 
 This creates:
+- `CLAUDE.md` — Specflow rules, contract references, project context placeholders (or appends to existing)
 - `docs/contracts/` — Default contract templates (security, accessibility, test integrity)
 - `scripts/agents/` — 30+ agent prompts
 - `tests/contracts/` — Contract schema tests
@@ -63,6 +64,8 @@ This creates:
 - `.git/hooks/commit-msg` — Rejects commits without issue numbers
 - `.specflow/baseline.json` — Regression test baseline
 - `package.json` — npm scripts for test/verify/compile (if not already present)
+
+After init, fill in the **Project Context** section in `CLAUDE.md` with your repo, board, CLI, and tech stack.
 
 ### Method 2: Clone + Setup Script
 
