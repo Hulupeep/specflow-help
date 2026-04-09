@@ -114,6 +114,7 @@ Quality gates adapted from [forge](https://github.com/ikennaokpala/forge) by [Ik
 ### Self-Healing & Learning
 - **[Self-Healing Fix Loops](/advanced/self-healing/)**: Autonomous violation repair with confidence-tiered fix patterns (Platinum → Bronze)
 - **[Post-Mortem Learning](/advanced/learning-system/)**: Violations get recorded, fixes get stored, agents get warned before repeating mistakes
+- **[Simulation Layer](/advanced/simulation/)**: Deterministic replay (ReplayLab) proves learning injection reduces repeat violations by 60%+ — no vibes, only measurements
 - **[CI Feedback Loop](/advanced/ci-feedback/)**: Automatic CI status reporting after every git push
 
 ### Agent System

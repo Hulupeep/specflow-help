@@ -377,6 +377,7 @@ hooks:
 
 ## Related Pages
 
+- [Simulation Layer](/advanced/simulation/) -- Deterministic replay proving the learning loop works (ReplayLab)
 - [Self-Healing Fix Loops](/advanced/self-healing/) -- Auto-fix with confidence-tiered patterns
 - [Security & Accessibility Gates](/core-concepts/security-accessibility/) -- Default SEC/A11Y rules
 - [Production Readiness Gates](/core-concepts/production-readiness/) -- PROD-001 through PROD-003

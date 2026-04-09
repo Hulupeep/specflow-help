@@ -24,6 +24,7 @@ This section covers advanced workflows for power users:
 - **[Journey Testing](/advanced/journey-testing/)** — End-to-end user journey tests
 - **[Self-Healing Fix Loops](/advanced/self-healing/)** — Autonomous violation repair with confidence-tiered patterns
 - **[Post-Mortem Learning System](/advanced/learning-system/)** — Violations get recorded, fixes get stored, agents get warned
+- **[Simulation Layer](/advanced/simulation/)** — Deterministic replay proving contracts learn from violations
 - **[CI Feedback Loop](/advanced/ci-feedback/)** — Automatic CI status reporting after every git push
 - **[Drift Prevention](/advanced/drift-prevention/)** — Three enforcement layers (hooks + CI + deploy gate) that stop spec-to-code drift
 
@@ -58,6 +59,7 @@ See [Journey Verification Hooks](/advanced/journey-verification-hooks/) for setu
 | [Journey Testing](/advanced/journey-testing/) | Create end-to-end user journey tests with Playwright |
 | [Self-Healing Fix Loops](/advanced/self-healing/) | Autonomous violation repair with confidence-tiered fix patterns |
 | [Post-Mortem Learning System](/advanced/learning-system/) | How violations and fixes become agent warnings |
+| [Simulation Layer](/advanced/simulation/) | ReplayLab proves learning injection works — no vibes, only measurements |
 | [CI Feedback Loop](/advanced/ci-feedback/) | Automatic CI status polling after git push |
 | [Drift Prevention](/advanced/drift-prevention/) | Three enforcement layers that stop spec-to-code drift |
 

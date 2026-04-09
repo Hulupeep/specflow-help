@@ -329,6 +329,8 @@ See [Model Routing](/agent-system/model-routing/) for the full routing table.
 
 ## Related Pages
 
+- [Simulation Layer](/advanced/simulation/) -- Deterministic replay proving the learning loop works (ReplayLab)
+- [Post-Mortem Learning System](/advanced/learning-system/) -- Violations and fixes become agent warnings
 - [Contract Schema](/reference/contract-schema/) -- `auto_fix` field reference
 - [Model Routing](/agent-system/model-routing/) -- Why heal-loop uses Opus
 - [waves-controller](/agent-system/waves-controller/) -- Phase 6a integration
